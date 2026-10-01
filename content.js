@@ -19,7 +19,19 @@ const triggerClick = (el) => {
   el.click();
 };
 
-const getModalConfirmBtn = (allowWebsites) => {
+const isOnSubscriptionsPage = () => {
+  const hash = window.location.hash.toLowerCase();
+  return hash.startsWith("#sub");
+};
+
+const isUnsubscribeControl = (el) => {
+  if (!el || !isVisible(el)) return false;
+  const txt = el.textContent?.trim().toLowerCase() || "";
+  const aria = el.getAttribute("aria-label")?.trim().toLowerCase() || "";
+  return txt === "unsubscribe" || aria === "unsubscribe" || aria.startsWith("unsubscribe ");
+};
+
+const getModalConfirmBtn = () => {
   const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
   const cancelBtn = allButtons.find(
     (b) => b.textContent?.trim().toLowerCase() === "cancel" && isVisible(b)
@@ -36,26 +48,17 @@ const getModalConfirmBtn = (allowWebsites) => {
 
   const actionBtn = Array.from(
     dialog.querySelectorAll('button, [role="button"], a')
-  ).find((b) => {
-    if (b === cancelBtn || !isVisible(b)) return false;
-    const txt = b.textContent?.trim().toLowerCase() || "";
-    if (txt === "unsubscribe") return true;
-    if (allowWebsites && txt.includes("website")) return true;
-    return false;
-  });
+  ).find((b) => b !== cancelBtn && isUnsubscribeControl(b));
 
-  return actionBtn || cancelBtn;
+  return actionBtn || null;
 };
 
 const getListButtons = () => {
   return Array.from(document.querySelectorAll('button, [role="button"]')).filter((b) => {
-    if (!isVisible(b)) return false;
+    if (!isUnsubscribeControl(b)) return false;
     if (b.closest('[role="dialog"], [role="alertdialog"], .Kj-JD, [aria-modal="true"]')) return false;
     if (b.parentElement?.textContent?.toLowerCase().includes("cancel")) return false;
-
-    const txt = b.textContent?.trim().toLowerCase();
-    const aria = b.getAttribute("aria-label")?.toLowerCase() || "";
-    return txt === "unsubscribe" || aria.startsWith("unsubscribe");
+    return true;
   });
 };
 
@@ -67,19 +70,19 @@ const blockRowNav = (e) => {
   }
 };
 
-const runUnsubscriber = async (allowWebsites) => {
+const runUnsubscriber = async () => {
   document.addEventListener("click", blockRowNav, { capture: true });
   console.log("Bulk Unsubscribe started.");
 
   try {
     while (isRunning) {
-      let confirmBtn = getModalConfirmBtn(allowWebsites);
+      const confirmBtn = getModalConfirmBtn();
 
       if (confirmBtn) {
         triggerClick(confirmBtn);
         for (let i = 0; i < 30; i++) {
           await sleep(100);
-          if (!getModalConfirmBtn(allowWebsites)) break;
+          if (!getModalConfirmBtn()) break;
         }
         await sleep(900);
         continue;
@@ -99,7 +102,7 @@ const runUnsubscriber = async (allowWebsites) => {
 
       for (let i = 0; i < 30; i++) {
         await sleep(100);
-        if (getModalConfirmBtn(allowWebsites)) break;
+        if (getModalConfirmBtn()) break;
       }
     }
   } finally {
@@ -110,9 +113,13 @@ const runUnsubscriber = async (allowWebsites) => {
 
 chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   if (req.action === "START") {
+    if (!isOnSubscriptionsPage()) {
+      sendResponse({ status: "Open Gmail subscriptions page (#sub)." });
+      return;
+    }
     if (!isRunning) {
       isRunning = true;
-      runUnsubscriber(req.allowWebsites);
+      runUnsubscriber();
       sendResponse({ status: "Processing..." });
     } else {
       sendResponse({ status: "Already running." });

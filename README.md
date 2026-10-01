@@ -4,16 +4,15 @@ A lightweight Chrome Extension (Manifest V3) for bulk-unsubscribing on Gmail's s
 
 ## What this does
 
-- Runs only on `https://mail.google.com/*`
+- Runs only on Gmail subscription routes (`#sub...`)
 - Clicks visible **Unsubscribe** actions from the bottom of the list upward
 - Confirms Gmail unsubscribe dialogs automatically
-- Optionally allows **Go to website** actions via popup checkbox
 - Lets you stop the process at any time
 
 ## Files
 
 - `manifest.json` – extension manifest and Gmail content-script wiring
-- `popup.html` – popup UI (Start/Stop + option toggle + status)
+- `popup.html` – popup UI (Start/Stop + status)
 - `popup.js` – sends START/STOP commands to the active Gmail tab
 - `content.js` – Gmail-side automation loop and dialog handling
 

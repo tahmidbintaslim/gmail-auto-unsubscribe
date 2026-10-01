@@ -22,9 +22,8 @@ const sendTabMessage = async (message) => {
 };
 
 document.getElementById("startBtn").addEventListener("click", () => {
-  const allowWebsites = document.getElementById("allowWebsites").checked;
   statusEl.textContent = "Running...";
-  sendTabMessage({ action: "START", allowWebsites });
+  sendTabMessage({ action: "START" });
 });
 
 document.getElementById("stopBtn").addEventListener("click", () => {
