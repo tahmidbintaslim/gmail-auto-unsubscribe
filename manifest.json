@@ -1,11 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Gmail Bulk Unsubscribe",
-  "version": "1.0",
-  "description": "Automatically confirms unsubscribe dialogs in Gmail subscriptions.",
-  "action": {
-    "default_popup": "popup.html"
+  "name": "UnsubLocal: Bulk Unsubscribe for Gmail",
+  "version": "1.0.0",
+  "description": "Bulk unsubscribe from promotional emails directly inside Gmail without sharing account or inbox access.",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "permissions": ["activeTab"],
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*"],
