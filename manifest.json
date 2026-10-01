@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Gmail Bulk Unsubscribe",
+  "version": "1.0",
+  "description": "Automatically confirms unsubscribe dialogs in Gmail subscriptions.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
