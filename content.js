@@ -1,4 +1,6 @@
 let isRunning = false;
+let activeRunId = 0;
+let navGuardUsers = 0;
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -31,7 +33,18 @@ const isUnsubscribeControl = (el) => {
   return txt === "unsubscribe" || aria === "unsubscribe" || aria.startsWith("unsubscribe ");
 };
 
-const getModalConfirmBtn = () => {
+const isWebsiteControl = (el) => {
+  if (!el || !isVisible(el)) return false;
+  const txt = el.textContent?.trim().toLowerCase() || "";
+  const aria = el.getAttribute("aria-label")?.trim().toLowerCase() || "";
+  return txt === "go to website" || aria === "go to website" || aria.startsWith("go to website ");
+};
+
+const isModalActionControl = (el, allowWebsites) => {
+  return isUnsubscribeControl(el) || (allowWebsites && isWebsiteControl(el));
+};
+
+const getModalConfirmBtn = (allowWebsites) => {
   const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
   const cancelBtn = allButtons.find(
     (b) => b.textContent?.trim().toLowerCase() === "cancel" && isVisible(b)
@@ -48,7 +61,7 @@ const getModalConfirmBtn = () => {
 
   const actionBtn = Array.from(
     dialog.querySelectorAll('button, [role="button"], a')
-  ).find((b) => b !== cancelBtn && isUnsubscribeControl(b));
+  ).find((b) => b !== cancelBtn && isModalActionControl(b, allowWebsites));
 
   return actionBtn || null;
 };
@@ -70,19 +83,36 @@ const blockRowNav = (e) => {
   }
 };
 
-const runUnsubscriber = async () => {
-  document.addEventListener("click", blockRowNav, { capture: true });
+const canRun = (runId) => isRunning && runId === activeRunId;
+
+const acquireNavGuard = () => {
+  if (navGuardUsers === 0) {
+    document.addEventListener("click", blockRowNav, { capture: true });
+  }
+  navGuardUsers += 1;
+};
+
+const releaseNavGuard = () => {
+  navGuardUsers = Math.max(0, navGuardUsers - 1);
+  if (navGuardUsers === 0) {
+    document.removeEventListener("click", blockRowNav, { capture: true });
+  }
+};
+
+const runUnsubscriber = async (runId, allowWebsites) => {
+  acquireNavGuard();
   console.log("Bulk Unsubscribe started.");
 
   try {
-    while (isRunning) {
-      const confirmBtn = getModalConfirmBtn();
+    while (canRun(runId)) {
+      const confirmBtn = getModalConfirmBtn(allowWebsites);
 
       if (confirmBtn) {
+        if (!canRun(runId)) break;
         triggerClick(confirmBtn);
         for (let i = 0; i < 30; i++) {
           await sleep(100);
-          if (!getModalConfirmBtn()) break;
+          if (!canRun(runId) || !getModalConfirmBtn(allowWebsites)) break;
         }
         await sleep(900);
         continue;
@@ -97,17 +127,20 @@ const runUnsubscriber = async () => {
       const targetBtn = listButtons[listButtons.length - 1];
       targetBtn.scrollIntoView({ block: "center", behavior: "smooth" });
       await sleep(350);
+      if (!canRun(runId)) break;
 
       triggerClick(targetBtn);
 
       for (let i = 0; i < 30; i++) {
         await sleep(100);
-        if (getModalConfirmBtn()) break;
+        if (!canRun(runId) || getModalConfirmBtn(allowWebsites)) break;
       }
     }
   } finally {
-    document.removeEventListener("click", blockRowNav, { capture: true });
-    isRunning = false;
+    releaseNavGuard();
+    if (runId === activeRunId) {
+      isRunning = false;
+    }
   }
 };
 
@@ -118,14 +151,18 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       return;
     }
     if (!isRunning) {
+      const runId = activeRunId + 1;
+      const allowWebsites = Boolean(req.allowWebsites);
+      activeRunId = runId;
       isRunning = true;
-      runUnsubscriber();
+      runUnsubscriber(runId, allowWebsites);
       sendResponse({ status: "Processing..." });
     } else {
       sendResponse({ status: "Already running." });
     }
   } else if (req.action === "STOP") {
     isRunning = false;
+    activeRunId += 1;
     sendResponse({ status: "Stopped." });
   }
 });

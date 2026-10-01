@@ -1,4 +1,5 @@
 const statusEl = document.getElementById("status");
+const allowWebsitesEl = document.getElementById("allowWebsites");
 
 const sendTabMessage = async (message) => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -23,7 +24,7 @@ const sendTabMessage = async (message) => {
 
 document.getElementById("startBtn").addEventListener("click", () => {
   statusEl.textContent = "Running...";
-  sendTabMessage({ action: "START" });
+  sendTabMessage({ action: "START", allowWebsites: allowWebsitesEl.checked });
 });
 
 document.getElementById("stopBtn").addEventListener("click", () => {
