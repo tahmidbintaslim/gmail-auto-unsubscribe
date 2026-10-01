@@ -2,7 +2,13 @@ const statusEl = document.getElementById("status");
 
 const sendTabMessage = async (message) => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab || !tab.url.includes("mail.google.com")) {
+  const tabUrl = tab?.url || tab?.pendingUrl || "";
+  let isGmail = false;
+  try {
+    isGmail = new URL(tabUrl).hostname === "mail.google.com";
+  } catch {}
+
+  if (!tab || !isGmail) {
     statusEl.textContent = "Open Gmail first.";
     return;
   }
