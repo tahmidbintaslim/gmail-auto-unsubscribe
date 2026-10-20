@@ -1,0 +1,22 @@
+{
+  "name": "gmail-auto-unsubscribe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension that works through Gmail's Manage subscriptions page and clicks Unsubscribe for each sender.",
+  "license": "MIT",
+  "author": "Tahmid Bin Taslim Rafi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tahmidbintaslim/gmail-auto-unsubscribe.git"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^5.0.3"
+  }
+}
