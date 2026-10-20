@@ -10,7 +10,7 @@
     "url": "git+https://github.com/tahmidbintaslim/gmail-auto-unsubscribe.git"
   },
   "engines": {
-    "node": ">=22.13"
+    "node": "^22.13.0 || ^24.0.0 || >=26.0.0"
   },
   "scripts": {
     "test": "vitest run"
