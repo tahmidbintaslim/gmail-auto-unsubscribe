@@ -1,168 +1,175 @@
-let isRunning = false;
-let activeRunId = 0;
-let navGuardUsers = 0;
+// popup.js injects this file on every Start. The IIFE and the flag keep a
+// second injection from redeclaring state or adding a second listener.
+(() => {
+  if (globalThis.__gmailAutoUnsubscribeLoaded) return;
+  globalThis.__gmailAutoUnsubscribeLoaded = true;
 
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+  let isRunning = false;
+  let activeRunId = 0;
+  let navGuardUsers = 0;
 
-const isVisible = (el) => {
-  if (!el) return false;
-  const r = el.getBoundingClientRect();
-  return r.width > 0 && r.height > 0 && window.getComputedStyle(el).visibility !== "hidden";
-};
+  const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
-const triggerClick = (el) => {
-  if (!el) return;
-  el.focus();
-  const opts = { bubbles: true, cancelable: true, view: window };
-  el.dispatchEvent(new PointerEvent("pointerdown", opts));
-  el.dispatchEvent(new MouseEvent("mousedown", opts));
-  el.dispatchEvent(new PointerEvent("pointerup", opts));
-  el.dispatchEvent(new MouseEvent("mouseup", opts));
-  el.click();
-};
+  const isVisible = (el) => {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && window.getComputedStyle(el).visibility !== "hidden";
+  };
 
-const isOnSubscriptionsPage = () => {
-  const hash = window.location.hash.toLowerCase();
-  return hash.startsWith("#sub");
-};
+  const triggerClick = (el) => {
+    if (!el) return;
+    el.focus();
+    const opts = { bubbles: true, cancelable: true, view: window };
+    el.dispatchEvent(new PointerEvent("pointerdown", opts));
+    el.dispatchEvent(new MouseEvent("mousedown", opts));
+    el.dispatchEvent(new PointerEvent("pointerup", opts));
+    el.dispatchEvent(new MouseEvent("mouseup", opts));
+    el.click();
+  };
 
-const isUnsubscribeControl = (el) => {
-  if (!el || !isVisible(el)) return false;
-  const txt = el.textContent?.trim().toLowerCase() || "";
-  const aria = el.getAttribute("aria-label")?.trim().toLowerCase() || "";
-  return txt === "unsubscribe" || aria === "unsubscribe" || aria.startsWith("unsubscribe ");
-};
+  const isOnSubscriptionsPage = () => {
+    const hash = window.location.hash.toLowerCase();
+    return hash.startsWith("#sub");
+  };
 
-const isWebsiteControl = (el) => {
-  if (!el || !isVisible(el)) return false;
-  const txt = el.textContent?.trim().toLowerCase() || "";
-  const aria = el.getAttribute("aria-label")?.trim().toLowerCase() || "";
-  return txt === "go to website" || aria === "go to website" || aria.startsWith("go to website ");
-};
+  const isUnsubscribeControl = (el) => {
+    if (!el || !isVisible(el)) return false;
+    const txt = el.textContent?.trim().toLowerCase() || "";
+    const aria = el.getAttribute("aria-label")?.trim().toLowerCase() || "";
+    return txt === "unsubscribe" || aria === "unsubscribe" || aria.startsWith("unsubscribe ");
+  };
 
-const isModalActionControl = (el, allowWebsites) => {
-  return isUnsubscribeControl(el) || (allowWebsites && isWebsiteControl(el));
-};
+  const isWebsiteControl = (el) => {
+    if (!el || !isVisible(el)) return false;
+    const txt = el.textContent?.trim().toLowerCase() || "";
+    const aria = el.getAttribute("aria-label")?.trim().toLowerCase() || "";
+    return txt === "go to website" || aria === "go to website" || aria.startsWith("go to website ");
+  };
 
-const getModalConfirmBtn = (allowWebsites) => {
-  const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
-  const cancelBtn = allButtons.find(
-    (b) => b.textContent?.trim().toLowerCase() === "cancel" && isVisible(b)
-  );
+  const isModalActionControl = (el, allowWebsites) => {
+    return isUnsubscribeControl(el) || (allowWebsites && isWebsiteControl(el));
+  };
 
-  if (!cancelBtn) return null;
+  const getModalConfirmBtn = (allowWebsites) => {
+    const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
+    const cancelBtn = allButtons.find(
+      (b) => b.textContent?.trim().toLowerCase() === "cancel" && isVisible(b)
+    );
 
-  const dialog =
-    cancelBtn.closest('[role="dialog"], [role="alertdialog"], .Kj-JD, [aria-modal="true"]') ||
-    cancelBtn.parentElement?.parentElement?.parentElement ||
-    cancelBtn.parentElement?.parentElement;
+    if (!cancelBtn) return null;
 
-  if (!dialog) return null;
+    const dialog =
+      cancelBtn.closest('[role="dialog"], [role="alertdialog"], .Kj-JD, [aria-modal="true"]') ||
+      cancelBtn.parentElement?.parentElement?.parentElement ||
+      cancelBtn.parentElement?.parentElement;
 
-  const actionBtn = Array.from(
-    dialog.querySelectorAll('button, [role="button"], a')
-  ).find((b) => b !== cancelBtn && isModalActionControl(b, allowWebsites));
+    if (!dialog) return null;
 
-  return actionBtn || null;
-};
+    const actionBtn = Array.from(
+      dialog.querySelectorAll('button, [role="button"], a')
+    ).find((b) => b !== cancelBtn && isModalActionControl(b, allowWebsites));
 
-const getListButtons = () => {
-  return Array.from(document.querySelectorAll('button, [role="button"]')).filter((b) => {
-    if (!isUnsubscribeControl(b)) return false;
-    if (b.closest('[role="dialog"], [role="alertdialog"], .Kj-JD, [aria-modal="true"]')) return false;
-    if (b.parentElement?.textContent?.toLowerCase().includes("cancel")) return false;
-    return true;
-  });
-};
+    return actionBtn || null;
+  };
 
-const blockRowNav = (e) => {
-  const link = e.target.closest("a");
-  if (link && (link.href.includes("sub_m") || link.href.includes("search/from"))) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-};
+  const getListButtons = () => {
+    return Array.from(document.querySelectorAll('button, [role="button"]')).filter((b) => {
+      if (!isUnsubscribeControl(b)) return false;
+      if (b.closest('[role="dialog"], [role="alertdialog"], .Kj-JD, [aria-modal="true"]')) return false;
+      if (b.parentElement?.textContent?.toLowerCase().includes("cancel")) return false;
+      return true;
+    });
+  };
 
-const canRun = (runId) => isRunning && runId === activeRunId;
+  const blockRowNav = (e) => {
+    const link = e.target.closest("a");
+    if (link && (link.href.includes("sub_m") || link.href.includes("search/from"))) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
-const acquireNavGuard = () => {
-  if (navGuardUsers === 0) {
-    document.addEventListener("click", blockRowNav, { capture: true });
-  }
-  navGuardUsers += 1;
-};
+  const canRun = (runId) => isRunning && runId === activeRunId;
 
-const releaseNavGuard = () => {
-  navGuardUsers = Math.max(0, navGuardUsers - 1);
-  if (navGuardUsers === 0) {
-    document.removeEventListener("click", blockRowNav, { capture: true });
-  }
-};
+  const acquireNavGuard = () => {
+    if (navGuardUsers === 0) {
+      document.addEventListener("click", blockRowNav, { capture: true });
+    }
+    navGuardUsers += 1;
+  };
 
-const runUnsubscriber = async (runId, allowWebsites) => {
-  acquireNavGuard();
-  console.log("Bulk Unsubscribe started.");
+  const releaseNavGuard = () => {
+    navGuardUsers = Math.max(0, navGuardUsers - 1);
+    if (navGuardUsers === 0) {
+      document.removeEventListener("click", blockRowNav, { capture: true });
+    }
+  };
 
-  try {
-    while (canRun(runId)) {
-      const confirmBtn = getModalConfirmBtn(allowWebsites);
+  const runUnsubscriber = async (runId, allowWebsites) => {
+    acquireNavGuard();
+    console.log("Bulk Unsubscribe started.");
 
-      if (confirmBtn) {
+    try {
+      while (canRun(runId)) {
+        const confirmBtn = getModalConfirmBtn(allowWebsites);
+
+        if (confirmBtn) {
+          if (!canRun(runId)) break;
+          triggerClick(confirmBtn);
+          for (let i = 0; i < 30; i++) {
+            await sleep(100);
+            if (!canRun(runId) || !getModalConfirmBtn(allowWebsites)) break;
+          }
+          await sleep(900);
+          continue;
+        }
+
+        const listButtons = getListButtons();
+        if (listButtons.length === 0) {
+          console.log("All subscriptions processed.");
+          break;
+        }
+
+        const targetBtn = listButtons[listButtons.length - 1];
+        targetBtn.scrollIntoView({ block: "center", behavior: "smooth" });
+        await sleep(350);
         if (!canRun(runId)) break;
-        triggerClick(confirmBtn);
+
+        triggerClick(targetBtn);
+
         for (let i = 0; i < 30; i++) {
           await sleep(100);
-          if (!canRun(runId) || !getModalConfirmBtn(allowWebsites)) break;
+          if (!canRun(runId) || getModalConfirmBtn(allowWebsites)) break;
         }
-        await sleep(900);
-        continue;
       }
-
-      const listButtons = getListButtons();
-      if (listButtons.length === 0) {
-        console.log("All subscriptions processed.");
-        break;
-      }
-
-      const targetBtn = listButtons[listButtons.length - 1];
-      targetBtn.scrollIntoView({ block: "center", behavior: "smooth" });
-      await sleep(350);
-      if (!canRun(runId)) break;
-
-      triggerClick(targetBtn);
-
-      for (let i = 0; i < 30; i++) {
-        await sleep(100);
-        if (!canRun(runId) || getModalConfirmBtn(allowWebsites)) break;
+    } finally {
+      releaseNavGuard();
+      if (runId === activeRunId) {
+        isRunning = false;
       }
     }
-  } finally {
-    releaseNavGuard();
-    if (runId === activeRunId) {
+  };
+
+  chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+    if (req.action === "START") {
+      if (!isOnSubscriptionsPage()) {
+        sendResponse({ status: "Open Gmail subscriptions page (#sub)." });
+        return;
+      }
+      if (!isRunning) {
+        const runId = activeRunId + 1;
+        const allowWebsites = Boolean(req.allowWebsites);
+        activeRunId = runId;
+        isRunning = true;
+        runUnsubscriber(runId, allowWebsites);
+        sendResponse({ status: "Processing..." });
+      } else {
+        sendResponse({ status: "Already running." });
+      }
+    } else if (req.action === "STOP") {
       isRunning = false;
+      activeRunId += 1;
+      sendResponse({ status: "Stopped." });
     }
-  }
-};
-
-chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
-  if (req.action === "START") {
-    if (!isOnSubscriptionsPage()) {
-      sendResponse({ status: "Open Gmail subscriptions page (#sub)." });
-      return;
-    }
-    if (!isRunning) {
-      const runId = activeRunId + 1;
-      const allowWebsites = Boolean(req.allowWebsites);
-      activeRunId = runId;
-      isRunning = true;
-      runUnsubscriber(runId, allowWebsites);
-      sendResponse({ status: "Processing..." });
-    } else {
-      sendResponse({ status: "Already running." });
-    }
-  } else if (req.action === "STOP") {
-    isRunning = false;
-    activeRunId += 1;
-    sendResponse({ status: "Stopped." });
-  }
-});
+  });
+})();
