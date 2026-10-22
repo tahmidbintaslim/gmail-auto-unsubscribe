@@ -25,8 +25,12 @@
 
   const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const isOnSubscriptionsPage = (loc = globalThis.location) =>
-    String(loc?.hash || "").toLowerCase().startsWith("#sub");
+  // Only the list itself counts: #sub, optionally with a ?query such as
+  // compose adds. A longer hash is another view where the run must not
+  // click: #sub_m... (where the sender links lead) or #sub/<id> (Gmail's
+  // pattern for a message opened from a view).
+  const SUBSCRIPTIONS_HASH = /^#sub(?:scriptions)?\/?(?:\?.*)?$/i;
+  const isOnSubscriptionsPage = (loc = globalThis.location) => SUBSCRIPTIONS_HASH.test(String(loc?.hash || ""));
 
   const isVisible = (el) => {
     if (!el || !el.isConnected) return false;
@@ -57,14 +61,17 @@
   const visibleControls = (root) =>
     Array.from(root.querySelectorAll(CONTROL_SELECTOR)).filter(isVisible);
 
-  // Visible "Unsubscribe" buttons in the sender list (not in a dialog).
+  // Visible "Unsubscribe" buttons in the sender list: not in a dialog, and
+  // without a Cancel button beside them (a dialog with no ARIA role). Only
+  // a Cancel control counts, so a sender whose name or address contains
+  // "cancel" is still found.
   const findRowButtons = (doc) =>
     Array.from(doc.querySelectorAll('button, [role="button"]')).filter(
       (el) =>
         isVisible(el) &&
         hasLabel(el, "unsubscribe") &&
         !el.closest(DIALOG_SELECTOR) &&
-        !(el.parentElement?.textContent || "").toLowerCase().includes("cancel")
+        !(el.parentElement && visibleControls(el.parentElement).some((other) => hasLabel(other, "cancel")))
     );
 
   // The open Gmail dialog, if any, with its Cancel button and the actions it

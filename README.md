@@ -1,6 +1,6 @@
 # Gmail Auto Unsubscribe
 
-**Status: prototype.** It is tested against a hand-written copy of Gmail's page, not yet on a live Gmail account. It has no Chrome Web Store listing; you install it with Load unpacked.
+**Status: prototype.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. It has no Chrome Web Store listing; you install it with Load unpacked.
 
 A Chrome extension (Manifest V3) for Gmail's Manage subscriptions page. When you press Start, it goes down the list of senders for you. For each one it clicks Unsubscribe and confirms Gmail's dialog, until the list is done or you press Stop.
 
@@ -8,7 +8,7 @@ A Chrome extension (Manifest V3) for Gmail's Manage subscriptions page. When you
 
 ## What it clicks
 
-- It acts only in the tab you opened the popup from, and only after you press **Start**. That tab must be on `mail.google.com` with an address whose `#` part starts with `#sub` (the Manage subscriptions view).
+- It acts only in the tab you opened the popup from, and only after you press **Start**. That tab must show the Manage subscriptions list on `mail.google.com`, at an address ending in `#sub`.
 - It clicks each visible **Unsubscribe** button in the sender list, starting from the bottom row. Each sender gets one try per run.
 - In the dialog that opens, it clicks **Unsubscribe** when Gmail offers a one-click unsubscribe. Otherwise it clicks **Cancel** and counts the sender as skipped.
 - It clicks **Go to website** only if you tick the box in the popup, and then at most 5 times per run. That opens the sender's own site in a new tab, where you finish by hand. The extension then closes the Gmail dialog with Cancel.
@@ -20,7 +20,7 @@ The popup shows how many senders were unsubscribed, skipped and sent to a websit
 
 - No sender is left that the run has not tried (**Done**).
 - You press **Stop**.
-- The tab leaves the Manage subscriptions view, for example when you open a message or the inbox.
+- The tab leaves the Manage subscriptions list, for example when you open a message or the inbox.
 - 250 senders in one run. Press **Start** again to continue with the rest.
 - A Gmail dialog stays open after Unsubscribe. The run stops instead of guessing.
 - An unexpected error, or the extension is reloaded or removed.
@@ -30,7 +30,7 @@ The popup shows how many senders were unsubscribed, skipped and sent to a websit
 - It never opens, reads, moves, labels or deletes your email. On the Manage subscriptions page it reads button labels and the text of sender rows, nothing else.
 - It never runs on a tab you did not open the popup from, or on any site other than `mail.google.com`.
 - It never clicks the Unsubscribe link inside a message. It checks the address before every click and stops once you leave the subscriptions view.
-- It confirms a dialog only right after opening it from a sender's row. A dialog that was already open when you press Start, or one Gmail shows only after the run stopped waiting for it (about 3 seconds), gets Cancel.
+- It confirms a dialog only right after opening it from a sender's row. A dialog that is open when the run moves to the next sender gets Cancel: one that was open before you pressed Start, or one Gmail showed after the run stopped waiting for it (about 3 seconds).
 - It clicks Cancel only inside a dialog, or next to an Unsubscribe or Go to website button. It leaves any other Cancel button on the page alone.
 - It never sends data anywhere, stores anything, or loads code from the internet.
 
@@ -100,6 +100,7 @@ Testing on real Gmail is still manual. Use a test account with a few newsletters
 - [ ] Load unpacked shows no errors for the extension on `chrome://extensions`.
 - [ ] On a site other than Gmail, Start shows "Open Gmail first."
 - [ ] On the Gmail inbox, Start shows "Open Gmail's Manage subscriptions page first."
+- [ ] On the Manage subscriptions list, the address ends in `#sub`. If it is anything else, Start refuses to run there; note the address so the check can be updated.
 - [ ] With a one-click sender in the list, Start unsubscribes it, its row leaves the list and the popup count goes up.
 - [ ] A sender whose dialog offers only Go to website, with the box unticked: the dialog closes with Cancel, the sender counts as skipped, and its dialog opens only once.
 - [ ] The same sender with the box ticked: one new tab opens for it and the Gmail dialog closes. No more than 5 tabs open in one run.

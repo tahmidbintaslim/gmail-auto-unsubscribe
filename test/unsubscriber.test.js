@@ -54,6 +54,16 @@ describe("one-click senders", () => {
     expect(gmail.clicks("Unsubscribe")[0].email).toBe(BLOG);
   });
 
+  it("finds a sender whose name contains the word cancel", async () => {
+    gmail = mountGmail();
+    const row = gmail.doc.querySelector('[aria-label="Unsubscribe from Example Shop"]').parentElement;
+    row.querySelector(".sender-name").textContent = "Cancel Culture Weekly";
+    const state = await run().done;
+
+    expect(state).toEqual({ phase: "done", unsubscribed: 5, skipped: 0, websites: 0, attempted: 5 });
+    expect(gmail.rows()).toEqual([]);
+  });
+
   it("reports progress after each sender", async () => {
     gmail = mountGmail();
     const seen = [];
@@ -160,6 +170,18 @@ describe("page scope and stopping", () => {
     expect(state).toMatchObject({ phase: "left-page", unsubscribed: 2 });
     expect(gmail.rows()).toEqual([SHOP, APP, CLUB]);
     expect(gmail.clicks("message-view")).toEqual([]);
+  });
+
+  it("stops when Gmail opens a sender's messages under #sub_m", async () => {
+    gmail = mountGmail({
+      onConfirm: ({ confirmed, win }) => {
+        if (confirmed === 1) win.location.hash = "#sub_m/sender-example";
+      },
+    });
+    const state = await run().done;
+
+    expect(state).toMatchObject({ phase: "left-page", unsubscribed: 1, attempted: 1 });
+    expect(gmail.rows()).toHaveLength(4);
   });
 
   it("does not start a pass off the subscriptions view", async () => {
@@ -276,6 +298,24 @@ describe("errors", () => {
 
     expect(state).toMatchObject({ phase: "error", attempted: 1 });
     expect(errors).toHaveLength(1);
+  });
+});
+
+describe("isOnSubscriptionsPage", () => {
+  it.each([
+    ["#sub", true],
+    ["#SUB", true],
+    ["#sub/", true],
+    ["#sub?compose=new", true],
+    ["#subscriptions", true],
+    ["#sub_m/sender-example", false],
+    ["#sub/FMfcgzExample", false],
+    ["#subfoo", false],
+    ["#inbox", false],
+    ["#search/from%3Anews%40shop.example", false],
+    ["", false],
+  ])("%s -> %s", (hash, expected) => {
+    expect(api.isOnSubscriptionsPage({ hash })).toBe(expected);
   });
 });
 
