@@ -9,6 +9,7 @@
   const { createRun, idleState, isOnSubscriptionsPage } = globalThis.GmailUnsubscriber;
 
   let run = null;
+  let runId = 0;
   let lastState = idleState();
   let orphaned = false;
 
@@ -36,7 +37,11 @@
     // A run that hit the row limit is continued, so Start moves on to the
     // senders it has not opened yet. Any other end starts a fresh pass.
     const seen = lastState.phase === "limit" && run ? run.seen : undefined;
-    run = createRun({ allowWebsites, onProgress: publish, seen });
+    // A stopped run can still be ending its current wait when Start makes a
+    // new one. Only the newest run may set the state, so its last report
+    // cannot show "stopped" over a running pass and let Start begin a third.
+    const id = (runId += 1);
+    run = createRun({ allowWebsites, onProgress: (state) => id === runId && publish(state), seen });
     return lastState;
   };
 

@@ -55,6 +55,26 @@ describe("content.js", () => {
     gmail.unmount();
   });
 
+  it("ignores a stopped run that winds down after a new Start", async () => {
+    const gmail = mountGmail(win);
+    try {
+      await ask({ action: "START" });
+      await ask({ action: "STOP" });
+      const from = progress.length;
+      expect((await ask({ action: "START" })).state.phase).toBe("running");
+
+      // The stopped run wakes from its wait first and ends; then the new run
+      // finishes its first sender.
+      await vi.waitFor(() => expect(progress.at(-1).state.unsubscribed).toBe(1), { timeout: 5000 });
+      const phases = progress.slice(from).map((message) => message.state.phase);
+      expect(phases).toEqual(phases.map(() => "running"));
+      expect((await ask({ action: "STATUS" })).state.phase).toBe("running");
+    } finally {
+      await ask({ action: "STOP" });
+      gmail.unmount();
+    }
+  });
+
   it("reports done on an empty list", async () => {
     const gmail = mountGmail(win);
     gmail.emptyList();

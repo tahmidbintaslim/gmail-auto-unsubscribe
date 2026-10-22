@@ -11,6 +11,8 @@ const DIALOGS = {
   "no-role": fixture("dialog-no-role.html"),
   // Gmail opens this one but none of its buttons respond.
   stuck: fixture("dialog-one-click.html"),
+  // Gmail opens this one only when the test calls openLate().
+  late: fixture("dialog-one-click.html"),
 };
 
 const fill = (html, values) => html.replace(/\{\{(\w+)\}\}/g, (_, key) => values[key]);
@@ -22,7 +24,8 @@ const parse = (doc, html) => {
 };
 
 // kinds maps a sender email to "one-click", "website-only", "no-role",
-// "stuck" or "none" (no dialog at all). Senders not listed are one-click.
+// "stuck", "late" (a one-click dialog that waits for openLate()) or "none"
+// (no dialog at all). Senders not listed are one-click.
 // With rerender, Gmail rebuilds every remaining row as new elements after
 // each dialog closes, as a virtual list might; with churn the rebuilt rows
 // also change their text, so no run can tell them from new senders.
@@ -37,6 +40,16 @@ export function mountGmail(win, { kinds = {}, rerender = false, churn = false, o
   const nameOf = (row) => row.querySelector(".sender-name").textContent;
   let confirmed = 0;
   let openDialog = null;
+  let lateRow = null;
+
+  const showDialog = (row, kind) => {
+    const email = emailOf(row);
+    const [, domain] = email.split("@");
+    openDialog = parse(doc, fill(DIALOGS[kind], { name: nameOf(row), domain }));
+    openDialog.dataset.email = email;
+    openDialog.dataset.kind = kind;
+    doc.body.append(openDialog);
+  };
 
   let renders = 0;
   const rebuild = () => {
@@ -83,11 +96,11 @@ export function mountGmail(win, { kinds = {}, rerender = false, churn = false, o
       const kind = kinds[email] || "one-click";
       log.push({ click: "row", email });
       if (kind === "none") return;
-      const [, domain] = email.split("@");
-      openDialog = parse(doc, fill(DIALOGS[kind], { name: nameOf(row), domain }));
-      openDialog.dataset.email = email;
-      openDialog.dataset.kind = kind;
-      doc.body.append(openDialog);
+      if (kind === "late") {
+        lateRow = row;
+        return;
+      }
+      showDialog(row, kind);
       return;
     }
 
@@ -103,6 +116,23 @@ export function mountGmail(win, { kinds = {}, rerender = false, churn = false, o
     doc.querySelector('[data-view="message"]').hidden = false;
   };
   const unmount = () => doc.removeEventListener("click", onClick);
+  // Shows the dialog a "late" sender's button asked for, once.
+  const openLate = () => {
+    if (!lateRow || openDialog) return;
+    showDialog(lateRow, "late");
+    lateRow = null;
+  };
 
-  return { doc, win, log, rows, clicks, emptyList, showMessageView, unmount, dialogOpen: () => Boolean(openDialog) };
+  return {
+    doc,
+    win,
+    log,
+    rows,
+    clicks,
+    emptyList,
+    showMessageView,
+    openLate,
+    unmount,
+    dialogOpen: () => Boolean(openDialog),
+  };
 }

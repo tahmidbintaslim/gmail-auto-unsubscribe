@@ -30,7 +30,8 @@ The popup shows how many senders were unsubscribed, skipped and sent to a websit
 - It never opens, reads, moves, labels or deletes your email. On the Manage subscriptions page it reads button labels and the text of sender rows, nothing else.
 - It never runs on a tab you did not open the popup from, or on any site other than `mail.google.com`.
 - It never clicks the Unsubscribe link inside a message. It checks the address before every click and stops once you leave the subscriptions view.
-- It never confirms a dialog it did not open. A dialog that is already open when you press Start gets Cancel.
+- It confirms a dialog only right after opening it from a sender's row. A dialog that was already open when you press Start, or one Gmail shows only after the run stopped waiting for it (about 3 seconds), gets Cancel.
+- It clicks Cancel only inside a dialog, or next to an Unsubscribe or Go to website button. It leaves any other Cancel button on the page alone.
 - It never sends data anywhere, stores anything, or loads code from the internet.
 
 ## Install (Load unpacked)
@@ -90,7 +91,7 @@ npm ci
 npm test
 ```
 
-The tests run the extension's own files in jsdom against `test/fixtures/`, a hand-written, anonymized stand-in for Gmail's Manage subscriptions page and its dialogs. It is not a capture of Gmail, so passing tests do not prove the extension works on the real page. They cover one-click senders, website-only senders, an empty list, the 250-sender cap, lists Gmail re-renders, leaving the page mid-run, Stop, dialogs that do not close, the popup flow with a stubbed `chrome` API, and the manifest's permissions.
+The tests run the extension's own files in jsdom against `test/fixtures/`, a hand-written, anonymized stand-in for Gmail's Manage subscriptions page and its dialogs. It is not a capture of Gmail, so passing tests do not prove the extension works on the real page. They cover one-click senders, website-only senders, an empty list, the 250-sender cap, lists Gmail re-renders, leaving the page mid-run, Stop, dialogs that do not close or open late, the popup flow with a stubbed `chrome` API, and the manifest's permissions.
 
 ## Manual test on real Gmail
 

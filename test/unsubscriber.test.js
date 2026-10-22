@@ -200,6 +200,36 @@ describe("page scope and stopping", () => {
     expect(state).toMatchObject({ phase: "done", unsubscribed: 5 });
   });
 
+  it("cancels a dialog that opens after the run stopped waiting for it", async () => {
+    gmail = mountGmail({ kinds: { [BLOG]: "late" } });
+    // Gmail shows the dialog only once the run has given up on it and moved on.
+    const sleep = async (ms) => {
+      await tick();
+      if (ms === api.TIMING.settleMs) gmail.openLate();
+    };
+    const state = await run({ sleep, timing: { waitSteps: 3 } }).done;
+
+    expect(state).toEqual({ phase: "done", unsubscribed: 4, skipped: 1, websites: 0, attempted: 5 });
+    expect(gmail.rows()).toEqual([BLOG]);
+    expect(emailsOf(gmail.clicks("Cancel"))).toEqual([BLOG]);
+    expect(emailsOf(gmail.clicks("Unsubscribe"))).toEqual([TRAVEL, CLUB, APP, SHOP]);
+    expect(gmail.dialogOpen()).toBe(false);
+  });
+
+  it("never clicks a Cancel button that is not part of a dialog", async () => {
+    gmail = mountGmail();
+    const stray = gmail.doc.createElement("button");
+    stray.textContent = "Cancel";
+    let strayClicks = 0;
+    stray.addEventListener("click", () => (strayClicks += 1));
+    gmail.doc.querySelector('nav[aria-label="Mail"]').append(stray);
+
+    const state = await run({ timing: { waitSteps: 3 } }).done;
+    expect(state).toEqual({ phase: "done", unsubscribed: 5, skipped: 0, websites: 0, attempted: 5 });
+    expect(strayClicks).toBe(0);
+    expect(gmail.rows()).toEqual([]);
+  });
+
   it("keeps its own clicks from following a sender link during the run", async () => {
     let prevented = null;
     gmail = mountGmail({
@@ -211,6 +241,24 @@ describe("page scope and stopping", () => {
       },
     });
     await run().done;
+    expect(prevented).toBe(true);
+  });
+
+  it("keeps a new run's link guard when a stopped run winds down", async () => {
+    let prevented = null;
+    gmail = mountGmail({
+      onConfirm: ({ confirmed, doc, win }) => {
+        if (confirmed !== 1) return;
+        const event = new win.MouseEvent("click", { bubbles: true, cancelable: true });
+        doc.querySelector('a[href^="#search/from"]').dispatchEvent(event);
+        prevented = event.defaultPrevented;
+      },
+    });
+    const first = run();
+    first.stop();
+    const second = run();
+    expect(await first.done).toMatchObject({ phase: "stopped", unsubscribed: 0 });
+    expect(await second.done).toMatchObject({ phase: "done", unsubscribed: 5 });
     expect(prevented).toBe(true);
   });
 });

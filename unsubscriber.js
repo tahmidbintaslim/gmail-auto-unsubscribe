@@ -57,9 +57,21 @@
   const visibleControls = (root) =>
     Array.from(root.querySelectorAll(CONTROL_SELECTOR)).filter(isVisible);
 
+  // Visible "Unsubscribe" buttons in the sender list (not in a dialog).
+  const findRowButtons = (doc) =>
+    Array.from(doc.querySelectorAll('button, [role="button"]')).filter(
+      (el) =>
+        isVisible(el) &&
+        hasLabel(el, "unsubscribe") &&
+        !el.closest(DIALOG_SELECTOR) &&
+        !(el.parentElement?.textContent || "").toLowerCase().includes("cancel")
+    );
+
   // The open Gmail dialog, if any, with its Cancel button and the actions it
   // offers. A dialog without an ARIA role is the smallest ancestor (up to
-  // three levels) of a visible Cancel button that also holds an action.
+  // three levels) of a visible Cancel button that also holds an action and
+  // no sender-row button. A Cancel button with no action next to it is not
+  // a dialog, so the run never clicks it.
   const findOpenDialog = (doc) => {
     const describe = (box, cancel) => {
       const controls = visibleControls(box).filter((el) => el !== cancel);
@@ -76,25 +88,19 @@
       if (cancel) return describe(box, cancel);
     }
 
-    const cancel = visibleControls(doc).find((el) => hasLabel(el, "cancel"));
-    if (!cancel) return null;
-    let box = cancel.parentElement;
-    for (let depth = 0; box && depth < 3; depth += 1, box = box.parentElement) {
-      const found = describe(box, cancel);
-      if (found.unsubscribe || found.website) return found;
+    const cancels = visibleControls(doc).filter((el) => hasLabel(el, "cancel"));
+    if (cancels.length === 0) return null;
+    const rowButtons = findRowButtons(doc);
+    for (const cancel of cancels) {
+      let box = cancel.parentElement;
+      for (let depth = 0; box && depth < 3; depth += 1, box = box.parentElement) {
+        if (rowButtons.some((button) => box.contains(button))) break;
+        const found = describe(box, cancel);
+        if (found.unsubscribe || found.website) return found;
+      }
     }
-    return describe(cancel.parentElement || cancel, cancel);
+    return null;
   };
-
-  // Visible "Unsubscribe" buttons in the sender list (not in a dialog).
-  const findRowButtons = (doc) =>
-    Array.from(doc.querySelectorAll('button, [role="button"]')).filter(
-      (el) =>
-        isVisible(el) &&
-        hasLabel(el, "unsubscribe") &&
-        !el.closest(DIALOG_SELECTOR) &&
-        !(el.parentElement?.textContent || "").toLowerCase().includes("cancel")
-    );
 
   // The sender row a button belongs to: the list item or table row around
   // it, else the largest ancestor (up to eight levels) that holds no other
@@ -165,6 +171,9 @@
     const onHashChange = () => {
       if (!isOnSubscriptionsPage(win.location)) end("left-page");
     };
+    // Each run adds and removes its own listener, so a stopped run that
+    // winds down after Start began a new one leaves the new run's guard on.
+    const guardClicks = (event) => blockRowNav(event);
 
     // Polls check() until it returns something truthy; null on timeout or end.
     const waitFor = async (check) => {
@@ -211,18 +220,27 @@
       if (!(await waitForClose()) && active()) end("dialog-stuck");
     };
 
+    // Before each sender, a dialog that is still open is closed, never
+    // confirmed: one that was open before Start, or one Gmail showed after
+    // the run gave up waiting for it. Confirming it would credit the wrong
+    // row and leave that row's sender untried.
+    const closeLeftover = async (leftover) => {
+      triggerClick(leftover.cancel);
+      if (!(await waitForClose()) && active()) end("dialog-stuck");
+    };
+
     const loop = async () => {
-      doc.addEventListener("click", blockRowNav, { capture: true });
+      doc.addEventListener("click", guardClicks, { capture: true });
       win.addEventListener("hashchange", onHashChange);
       try {
-        // A dialog the run did not open is closed, never confirmed.
-        const stray = findOpenDialog(doc);
-        if (stray) {
-          triggerClick(stray.cancel);
-          if (!(await waitForClose()) && active()) end("dialog-stuck");
-        }
-
         while (active()) {
+          // Only awaited when a dialog is open, so an empty list ends before
+          // Start replies and the popup shows Done straight away.
+          const leftover = findOpenDialog(doc);
+          if (leftover) {
+            await closeLeftover(leftover);
+            if (!active()) break;
+          }
           if (counts.attempted >= lim.maxRows) {
             end("limit");
             break;
@@ -257,7 +275,7 @@
         end("error");
         console.error("Gmail Auto Unsubscribe stopped:", error);
       } finally {
-        doc.removeEventListener("click", blockRowNav, { capture: true });
+        doc.removeEventListener("click", guardClicks, { capture: true });
         win.removeEventListener("hashchange", onHashChange);
         end("stopped");
         report();
