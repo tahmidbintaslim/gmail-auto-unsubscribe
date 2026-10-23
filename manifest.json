@@ -2,14 +2,9 @@
   "manifest_version": 3,
   "name": "Gmail Bulk Unsubscribe",
   "version": "1.0",
-  "description": "Automatically confirms unsubscribe dialogs in Gmail subscriptions.",
+  "description": "On Gmail's Manage subscriptions page, clicks Unsubscribe for each sender in turn after you press Start.",
+  "permissions": ["activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://mail.google.com/*"],
-      "js": ["content.js"]
-    }
-  ]
+  }
 }

@@ -1,0 +1,70 @@
+<!--
+  Anonymized stand-in for Gmail's Manage subscriptions view. It is written
+  by hand, not captured from Gmail: it has only what unsubscriber.js relies
+  on (one visible "Unsubscribe" button per sender row, a sender link the
+  run must not follow, and an earlier view Gmail keeps hidden in the page).
+  All names and addresses are made up. Replace it with an anonymized
+  capture from a real account once one is recorded (see the README).
+-->
+<div class="app">
+  <nav aria-label="Mail">
+    <a href="#inbox">Inbox</a>
+    <a href="#sub">Manage subscriptions</a>
+  </nav>
+
+  <div class="view" data-view="message" hidden>
+    <div role="main">
+      <h2>Weekly digest</h2>
+      <span>digest@digest.example</span>
+      <button aria-label="Unsubscribe from Digest Example">Unsubscribe</button>
+    </div>
+  </div>
+
+  <div class="view" data-view="sub">
+    <div role="main">
+      <h2>Manage subscriptions</h2>
+      <div role="list" aria-label="Subscriptions">
+        <div role="listitem">
+          <a href="#search/from%3Anews%40shop.example">
+            <span class="sender-name">Example Shop</span>
+            <span class="sender-email">news@shop.example</span>
+          </a>
+          <span>14 emails in the last month</span>
+          <button aria-label="Unsubscribe from Example Shop">Unsubscribe</button>
+        </div>
+        <div role="listitem">
+          <a href="#search/from%3Aupdates%40app.example">
+            <span class="sender-name">Example App</span>
+            <span class="sender-email">updates@app.example</span>
+          </a>
+          <span>9 emails in the last month</span>
+          <button aria-label="Unsubscribe from Example App">Unsubscribe</button>
+        </div>
+        <div role="listitem">
+          <a href="#search/from%3Ahello%40club.example">
+            <span class="sender-name">Example Club</span>
+            <span class="sender-email">hello@club.example</span>
+          </a>
+          <span>6 emails in the last month</span>
+          <button aria-label="Unsubscribe from Example Club">Unsubscribe</button>
+        </div>
+        <div role="listitem">
+          <a href="#search/from%3Aoffers%40travel.example">
+            <span class="sender-name">Example Travel</span>
+            <span class="sender-email">offers@travel.example</span>
+          </a>
+          <span>4 emails in the last month</span>
+          <button aria-label="Unsubscribe from Example Travel">Unsubscribe</button>
+        </div>
+        <div role="listitem">
+          <a href="#search/from%3Aletters%40blog.example">
+            <span class="sender-name">Example Blog</span>
+            <span class="sender-email">letters@blog.example</span>
+          </a>
+          <span>2 emails in the last month</span>
+          <button aria-label="Unsubscribe from Example Blog">Unsubscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

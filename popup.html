@@ -46,14 +46,14 @@
     }
     .option {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
       font-size: 12px;
       color: #3c4043;
       margin: 2px 0 8px;
     }
     .option input {
-      margin: 0;
+      margin: 1px 0 0;
     }
   </style>
 </head>
@@ -61,12 +61,13 @@
   <h3>Gmail Unsubscriber</h3>
   <label class="option">
     <input id="allowWebsites" type="checkbox">
-    Allow "Go to website" actions
+    When a sender has no one-click unsubscribe, open its "Go to website" link (up to 5 per run)
   </label>
   <button id="startBtn">Start Unsubscribing</button>
   <button id="stopBtn">Stop</button>
   <div id="status" role="status" aria-live="polite">Ready</div>
 
+  <script src="unsubscriber.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
