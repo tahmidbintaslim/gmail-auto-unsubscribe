@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gmail Auto Unsubscribe demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #eef0f3;
+      --panel: #ffffff;
+      --ink: #1f2328;
+      --muted: #59636e;
+      --line: #d0d7de;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 16px;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px 16px;
+      max-width: 1000px;
+      margin: 0 auto 12px;
+    }
+    h1 { margin: 0 0 2px; font-size: 18px; }
+    header p { margin: 0; color: var(--muted); max-width: 70ch; }
+    #reset {
+      padding: 7px 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    .stage {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 16px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .window {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .tab { flex: 1 1 480px; min-width: 0; }
+    .bar {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f6f8fa;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .bar strong { color: var(--ink); font-weight: 600; }
+    .bar code { font-size: 12px; }
+    iframe { display: block; width: 100%; border: 0; }
+    #gmail { height: 440px; }
+    .popup { flex: 0 0 auto; }
+    #popup { width: 258px; height: 210px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Gmail Auto Unsubscribe: demo</h1>
+      <p>
+        The extension's own popup.html, popup.js, unsubscriber.js and content.js,
+        run against the test fixture in test/fixtures/, a hand-written stand-in
+        for Gmail. demo.js plays the parts of the chrome.* APIs and of Gmail's
+        dialogs. Nothing on this page talks to Google or to any sender, and a
+        "Go to website" click is counted but opens nothing.
+      </p>
+    </div>
+    <button id="reset" type="button">Reset</button>
+  </header>
+
+  <main class="stage">
+    <section class="window tab" aria-label="Stand-in Gmail tab">
+      <div class="bar"><strong>Stand-in Gmail tab</strong> <code id="address">#sub</code></div>
+      <iframe id="gmail" title="Test fixture standing in for Gmail's Manage subscriptions page"></iframe>
+    </section>
+    <aside class="window popup" aria-label="Extension popup">
+      <div class="bar"><strong>Extension popup</strong> popup.html</div>
+      <iframe id="popup" title="Extension popup"></iframe>
+    </aside>
+  </main>
+
+  <script src="demo.js"></script>
+</body>
+</html>
