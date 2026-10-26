@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The versions package.json "engines" supports.
+        # package.json "engines" also allows Node 26+, which CI does not test.
         node: [22, 24]
     steps:
       - uses: actions/checkout@v6

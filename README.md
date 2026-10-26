@@ -65,7 +65,7 @@ sequenceDiagram
 
 ## What it never does
 
-- It never opens, reads, moves, labels or deletes your email. On the Manage subscriptions page it reads button labels and the text of sender rows, nothing else.
+- It never opens, reads, moves, labels or deletes your email. On the Manage subscriptions page it reads button and link labels, the text of sender rows, the tab's address and the address of a link it is about to follow, nothing else.
 - It never runs on a tab you did not open the popup from, or on any site other than `mail.google.com`.
 - It never clicks the Unsubscribe link inside a message. It checks the address before every click and stops once you leave the subscriptions view.
 - It confirms a dialog only right after opening it from a sender's row. A dialog that is open when the run moves to the next sender gets Cancel: one that was open before you pressed Start, or one Gmail showed after the run stopped waiting for it (about 3 seconds).
@@ -80,20 +80,20 @@ What it reads, and when:
 
 | Data | When | What it is used for |
 | --- | --- | --- |
-| The active tab's address | When you open the popup, and on Start or Stop | Checking the host is `mail.google.com` (popup) and the hash is the subscriptions list (Gmail tab) |
+| The active tab's address | When you open the popup, on Start or Stop, and before each click during a run | Checking the host is `mail.google.com` (popup) and the hash is the subscriptions list (Gmail tab) |
 | Text and `aria-label` of visible buttons and links | During a run, in the Gmail tab | Finding Unsubscribe, Cancel and Go to website |
 | The text of each sender row (name, address, Gmail's count line) | During a run, in the Gmail tab | Telling rows apart, so each sender is tried once per run |
 | The address of a link clicked in the Gmail tab | During a run | Stopping a click from following a sender's link to its messages or a search |
 
 Where it lives: run counts and the row text above stay in memory in the Gmail tab and are gone when the tab reloads. Nothing is written to disk, to `chrome.storage` or to web storage.
 
-What leaves your browser because of this extension: nothing.
+What leaves your browser because of this extension: the extension itself sends nothing. The clicks it makes cause Gmail to send unsubscribe requests and, if you allow it, open senders' websites.
 
 - No network requests: no `fetch`, XMLHttpRequest, WebSocket, EventSource or beacon calls, and no analytics.
 - No background service worker, no remote code, no account or server.
 - The only messages are between the popup and the Gmail tab, inside Chrome. On an unexpected error it writes one line to the Gmail tab's DevTools console.
 
-`test/manifest.test.js` fails if any file the extension ships gains a network, storage or remote-code call, or a URL.
+`test/manifest.test.js` fails if `manifest.json`, `popup.html`, `popup.js`, `unsubscriber.js` or `content.js` contains `fetch`, XMLHttpRequest, WebSocket, EventSource, `sendBeacon`, `chrome.storage`, web storage or IndexedDB, `eval` or `new Function`, or an `http(s)://` URL. It is a pattern check, not a proof.
 
 What Gmail and senders see is the same as if you clicked yourself: when the extension confirms Unsubscribe, Gmail handles the request to the sender. If you allow Go to website, the sender's site opens in a new tab and sees a normal visit.
 
@@ -207,7 +207,7 @@ Testing on real Gmail is still manual. Use a test account with a few newsletters
 
 Prototype. The loop, its limits and the popup are covered by tests against stand-in markup; nothing has been verified on a live Gmail account yet.
 
-Next: run the manual checklist below on a real account and replace the hand-written fixtures with an anonymized capture of the real page. Not started: a preview or keep-list so a run can skip senders, and labels for Gmail languages other than English.
+Next: run the [manual checklist](#manual-test-on-real-gmail) on a real account and replace the hand-written fixtures with an anonymized capture of the real page. Not started: a preview or keep-list so a run can skip senders, and labels for Gmail languages other than English.
 
 ## Limitations
 
