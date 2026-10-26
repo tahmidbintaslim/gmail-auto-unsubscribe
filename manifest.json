@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Gmail Bulk Unsubscribe",
+  "name": "Gmail Auto Unsubscribe",
   "version": "1.0",
   "description": "On Gmail's Manage subscriptions page, clicks Unsubscribe for each sender in turn after you press Start.",
   "permissions": ["activeTab", "scripting"],
