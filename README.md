@@ -132,16 +132,22 @@ The extension matches Gmail's English labels (Unsubscribe, Cancel, Go to website
 
 [`demo/`](demo/) runs the extension's own `popup.html`, `popup.js`, `unsubscriber.js` and `content.js` in two frames, against the hand-written fixture in `test/fixtures/`. `demo/demo.js` stands in for Chrome's extension APIs and for Gmail's dialogs. One sender only offers Go to website, so a run shows both outcomes. The page makes no requests outside the local server, and a Go to website click is counted but opens nothing.
 
-It fetches files, so serve the repository root over HTTP instead of opening the file directly:
+It fetches files, so serve the repository root over HTTP instead of opening the file directly. One command, no dependencies beyond Node:
 
 ```bash
-python3 -m http.server 8000
-# or: npx serve -l 8000 .
+npm run demo        # serves the repo on http://localhost:8000 (PORT=... to change)
+# or: python3 -m http.server 8000
 ```
 
 Then open <http://localhost:8000/demo/> and press **Start Unsubscribing**. **Reset** reloads the list.
 
 ![The same demo after the run: the popup shows "Done: 4 unsubscribed, 1 skipped." and only Example Travel, the website-only sender, is left in the list](docs/images/demo-done.png)
+
+A full run, recorded with Playwright from `npm run demo` (15 seconds):
+
+![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Done: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
+
+`vercel.json` lets Vercel serve the same page as a static site, with `/` going to `/demo/`. No hosted copy exists yet.
 
 The demo is a way to watch the loop, not evidence that it works on real Gmail: it uses the same stand-in markup as the tests.
 
@@ -178,6 +184,7 @@ unsubscriber.js       The loop: finds rows and dialogs, clicks, counts, enforces
 content.js            Message bridge between the popup and the loop
 test/                 Vitest + jsdom tests; fixtures/ holds the stand-in Gmail markup
 demo/                 Browser demo of the real files against the fixtures (not shipped)
+scripts/serve-demo.mjs  Dependency-free local server for the demo (npm run demo)
 docs/images/          README screenshots, captured from demo/
 ```
 
