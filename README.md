@@ -147,7 +147,7 @@ A full run, recorded with Playwright from `npm run demo` (15 seconds):
 
 ![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Done: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
 
-`vercel.json` lets Vercel serve the same page as a static site, with `/` going to `/demo/`. No hosted copy exists yet.
+Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (the same page, served by Vercel from `vercel.json`, with `/` going to `/demo/`). It is the stand-in demo, not Gmail.
 
 The demo is a way to watch the loop, not evidence that it works on real Gmail: it uses the same stand-in markup as the tests.
 
