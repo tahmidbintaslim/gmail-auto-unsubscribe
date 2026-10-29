@@ -17,7 +17,7 @@
     "demo": "node scripts/serve-demo.mjs"
   },
   "devDependencies": {
-    "jsdom": "^29.1.1",
-    "vitest": "^5.0.3"
+    "jsdom": "^30.1.2",
+    "vitest": "^5.0.4"
   }
 }
