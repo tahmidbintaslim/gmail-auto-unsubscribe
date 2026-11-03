@@ -1,0 +1,55 @@
+name: Bug report
+description: The extension clicked the wrong thing, missed a sender or stopped unexpectedly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please check [Known limitations](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#known-limitations) first: only the English Gmail interface is supported.
+        Do not paste real sender names, email addresses or message content. For a security problem, do not use this form. Follow SECURITY.md instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect to see? Include the popup's status line.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Manage subscriptions
+        2. Press Start Unsubscribing
+        3. See ...
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did it happen?
+      options:
+        - Real Gmail
+        - Local demo (npm run demo)
+        - Hosted demo
+        - Tests (npm test)
+    validations:
+      required: true
+  - type: input
+    id: address
+    attributes:
+      label: Gmail address bar hash
+      description: The part of the address after `#`, for example `#sub`. Remove any IDs.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 140 on Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output
+      description: Any line the extension wrote to the Gmail tab's DevTools console.
+      render: text
