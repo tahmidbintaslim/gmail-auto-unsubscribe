@@ -64,7 +64,7 @@ Unverified assumptions are marked **[verify]**. Each one is a task in the plan.
 - **Build:** [WXT](https://wxt.dev) (Vite-based, Manifest V3) + TypeScript + Preact for the side panel. Keep Vitest and jsdom; Playwright for end-to-end tests.
 - **Gmail access:** `chrome.identity.getAuthToken`. Scopes: `gmail.readonly` (restricted; needed for search, `List-Unsubscribe` headers and digest bodies) and `gmail.send` (sensitive; for `mailto:` unsubscribes). No `gmail.modify` in v1.
 - **Unsubscribe executor**, in priority order:
-  1. RFC 8058 one-click: `POST` `List-Unsubscribe=One-Click` to the https URL. A form-encoded `no-cors` fetch needs no host permission **[verify in MV3 service worker]**.
+  1. RFC 8058 one-click: `POST` `List-Unsubscribe=One-Click` to the https URL. A form-encoded `no-cors` fetch needs no host permission (verified 2026-11-09 in Chromium 153: the server receives the POST with the right content type and body; the response is opaque, so a 4xx/5xx looks like success, and a 302 is followed as GET).
   2. `mailto:`: send through `gmail.send`.
   3. Website link only: open a tab; the user finishes by hand.
   4. Fallback: Quick mode on Gmail's Manage subscriptions page.
