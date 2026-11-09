@@ -4,6 +4,7 @@
   "outputDirectory": ".",
   "rewrites": [
     { "source": "/", "destination": "/site/index.html" },
-    { "source": "/privacy", "destination": "/site/privacy.html" }
+    { "source": "/privacy", "destination": "/site/privacy.html" },
+    { "source": "/privacy/", "destination": "/site/privacy.html" }
   ]
 }

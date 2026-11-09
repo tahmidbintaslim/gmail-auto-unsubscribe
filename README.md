@@ -56,7 +56,7 @@ sequenceDiagram
 
 ## When a run stops
 
-- No sender is left that the run has not tried (**Done**).
+- No sender is left that the run has not tried (**Swept**).
 - You press **Stop**.
 - The tab leaves the Manage subscriptions list, for example when you open a message or the inbox.
 - 250 senders in one run. Press **Start** again to continue with the rest.
@@ -147,7 +147,7 @@ A full run, recorded with Playwright from `npm run demo` (15 seconds):
 
 ![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Swept: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
 
-Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (the same page, served by Vercel from `vercel.json`, with `/` going to `/demo/`). It is the stand-in demo, not Gmail.
+Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (served by Vercel from `vercel.json`: `/` is the landing page, `/demo/` this demo, `/privacy` the privacy policy). The demo is a stand-in, not Gmail.
 
 The demo is a way to watch the loop, not evidence that it works on real Gmail: it uses the same stand-in markup as the tests.
 
@@ -211,7 +211,7 @@ Testing on real Gmail is still manual. Use a test account with a few newsletters
 - [ ] Stop during a run: no clicks after the current sender.
 - [ ] Opening a message during a run: the run stops with "left the subscriptions page" and nothing in the message is clicked.
 - [ ] Closing and reopening the popup during a run: the counts are still shown.
-- [ ] An empty list: Start reports Done with zero counts.
+- [ ] An empty list: Start reports "Swept: 0 unsubscribed, 0 skipped."
 - [ ] A long list: senders Gmail loads as you scroll are processed. This is not verified yet; if some are missed, note it and press Start again.
 - [ ] Save an anonymized copy of the real page and both dialog types to `test/fixtures/` to replace the hand-written ones.
 

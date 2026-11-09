@@ -66,8 +66,13 @@
       background: var(--accent);
       color: var(--accent-fg);
     }
-    #startBtn:hover {
-      filter: brightness(1.08);
+    #startBtn:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+    #startBtn:hover:not(:disabled) {
+      /* darker on hover keeps text contrast above 4.5:1 in both themes */
+      filter: brightness(0.92);
     }
     #stopBtn {
       background: var(--surface);

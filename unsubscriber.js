@@ -280,7 +280,7 @@
         }
       } catch (error) {
         end("error");
-        console.error("Gmail Auto Unsubscribe stopped:", error);
+        console.error("UnsubSweep stopped:", error);
       } finally {
         doc.removeEventListener("click", guardClicks, { capture: true });
         win.removeEventListener("hashchange", onHashChange);

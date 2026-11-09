@@ -52,7 +52,7 @@ h1 { font-size: clamp(34px, 6vw, 54px); line-height: 1.05; letter-spacing: -0.03
 .zeros { display: grid; gap: 16px; padding: 24px 0 64px; }
 @media (min-width: 700px) { .zeros { grid-template-columns: repeat(3, 1fr); } }
 .zero { background: var(--surface); border-radius: 14px; padding: 22px; }
-.zero b { display: block; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 6px; }
+.zero h2 { font-size: 22px; letter-spacing: -0.01em; margin: 0 0 6px; }
 .zero p { margin: 0; color: var(--muted); font-size: 15px; }
 footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 14px; }
 footer a { color: var(--muted); margin-right: 16px; }

@@ -1,5 +1,6 @@
 const statusEl = document.getElementById("status");
 const allowWebsitesEl = document.getElementById("allowWebsites");
+const startBtn = document.getElementById("startBtn");
 const { describeState } = globalThis.GmailUnsubscriber;
 
 // Injected in this order on Start. Opening the popup grants activeTab for
@@ -34,6 +35,8 @@ let gmailTabId = null;
 
 const show = (state) => {
   statusEl.textContent = describeState(state);
+  // A second Start during a run would do nothing useful; make that visible.
+  startBtn.disabled = state?.phase === "running";
 };
 
 // A run keeps going after the popup closes. Reopening it shows the counts.
@@ -49,7 +52,7 @@ const init = async () => {
   if (res?.state && res.state.phase !== "idle") show(res.state);
 };
 
-document.getElementById("startBtn").addEventListener("click", async () => {
+startBtn.addEventListener("click", async () => {
   const tab = await getGmailTab();
   if (!tab) {
     statusEl.textContent = "Open Gmail first.";
@@ -64,7 +67,8 @@ document.getElementById("startBtn").addEventListener("click", async () => {
   }
   statusEl.textContent = "Starting...";
   const res = await sendToTab(tab.id, { action: "START", allowWebsites: allowWebsitesEl.checked });
-  statusEl.textContent = res?.state ? describeState(res.state) : "Reload Gmail and try again.";
+  if (res?.state) show(res.state);
+  else statusEl.textContent = "Reload Gmail and try again.";
 });
 
 document.getElementById("stopBtn").addEventListener("click", async () => {
@@ -74,7 +78,8 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
     return;
   }
   const res = await sendToTab(tab.id, { action: "STOP" });
-  statusEl.textContent = res?.state ? describeState(res.state) : "Not running.";
+  if (res?.state) show(res.state);
+  else statusEl.textContent = "Not running.";
 });
 
 init();

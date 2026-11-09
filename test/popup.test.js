@@ -82,6 +82,15 @@ describe("popup.js", () => {
     expect(status()).toBe("Swept: 2 unsubscribed, 0 skipped.");
   });
 
+  it("disables Start while a run is going and re-enables it after", async () => {
+    await vi.waitFor(() => expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(7, { action: "STATUS" }));
+    const start = win.document.getElementById("startBtn");
+    onMessage({ type: "PROGRESS", state: { ...running } }, { tab: { id: 7 } });
+    expect(start.disabled).toBe(true);
+    onMessage({ type: "PROGRESS", state: { ...running, phase: "done" } }, { tab: { id: 7 } });
+    expect(start.disabled).toBe(false);
+  });
+
   it("stops the run on Stop", async () => {
     replies.STOP = { state: { ...running, phase: "stopped", unsubscribed: 4 } };
     click("stopBtn");

@@ -17,7 +17,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const out = join(root, "dist", `unsubsweep-${manifest.version}.zip`);
   mkdirSync(dirname(out), { recursive: true });
   rmSync(out, { force: true });
-  // -X drops extra file attributes so the zip is the same on every machine.
+  // -X leaves out extra file attributes (owner ids, extended timestamps).
   execFileSync("zip", ["-X", "-q", out, ...shippedFiles(manifest)], { cwd: root, stdio: "inherit" });
   console.log(out);
 }
