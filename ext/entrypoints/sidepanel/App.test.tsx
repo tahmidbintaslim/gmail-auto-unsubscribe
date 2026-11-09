@@ -9,7 +9,7 @@ import type { LogEntry } from "../../lib/executor";
 
 const sender = (name: string, recommend: boolean): Scored => ({
   email: `${name}@x.co`, name, domain: "x.co", messages90d: 5, unread: 4, lastOpenedAt: null, lastSeenAt: 1,
-  replied: false, methods: { oneClickUrl: "https://x.co/u" }, score: recommend ? 80 : 10, recommend, reasons: ["Never opened"],
+  replied: false, methods: { oneClickUrl: "https://x.co/u" }, score: recommend ? 80 : 10, recommend, reasons: ["You haven't read any"],
 });
 const three = [sender("Alpha", true), sender("Beta", true), sender("Gamma", false)];
 
@@ -22,8 +22,8 @@ async function mount(props: Parameters<typeof App>[0]) {
 const click = (el: Element) => act(async () => { (el as HTMLElement).click(); await Promise.resolve(); });
 const btn = (text: RegExp) => [...root.querySelectorAll("button")].find((b) => text.test(b.textContent ?? ""))!;
 const boxes = () => [...root.querySelectorAll<HTMLInputElement>("input[type=checkbox]")];
-async function toReview(run: AppProps["run"] = vi.fn(async () => {})) {
-  await mount({ scan: async () => three, run });
+async function toReview(run: AppProps["run"] = vi.fn(async () => {}), stop: () => void = () => {}) {
+  await mount({ scan: async () => three, run, stop });
   await click(btn(/Connect Gmail/));
   return run;
 }
@@ -31,7 +31,7 @@ afterEach(() => { root?.remove(); vi.unstubAllGlobals(); });
 
 describe("App", () => {
   it("signed-out shows connect button and privacy line", async () => {
-    await mount({ scan: async () => three, run: async () => {} });
+    await mount({ scan: async () => three, run: async () => {}, stop: () => {} });
     expect(btn(/Connect Gmail/)).toBeTruthy();
     expect(root.textContent).toContain("Your email stays in this browser.");
   });
@@ -39,7 +39,7 @@ describe("App", () => {
     await toReview();
     expect(boxes().filter((b) => b.checked)).toHaveLength(2);
     expect(btn(/Unsubscribe from/).textContent).toBe("Unsubscribe from 2 senders");
-    expect(root.textContent).toContain("Never opened");
+    expect(root.textContent).toContain("You haven't read any");
     expect(root.textContent).toContain("One-click");
   });
   it("disables the button when nothing is checked", async () => {
@@ -60,7 +60,7 @@ describe("App", () => {
   it("caps at 250 and says so", async () => {
     const many = Array.from({ length: 260 }, (_, i) => sender(`S${i}`, true));
     const run = vi.fn(async (_i: Scored[], _o: (e: LogEntry) => void) => {});
-    await mount({ scan: async () => many, run });
+    await mount({ scan: async () => many, run, stop: () => {} });
     await click(btn(/Connect Gmail/));
     expect(btn(/Unsubscribe from/).textContent).toBe("Unsubscribe from 250 senders");
     await click(btn(/Unsubscribe from/));
@@ -93,7 +93,7 @@ describe("App", () => {
     expect(root.textContent).toContain("Done");
   });
   it("shows Sign in again on AuthError", async () => {
-    await mount({ scan: async () => { throw new AuthError("x"); }, run: async () => {} });
+    await mount({ scan: async () => { throw new AuthError("x"); }, run: async () => {}, stop: () => {} });
     await click(btn(/Connect Gmail/));
     expect(btn(/Sign in again/)).toBeTruthy();
   });
@@ -107,17 +107,29 @@ describe("App", () => {
       report = onProgress!;
       return new Promise<Scored[]>(() => {});
     });
-    await mount({ scan, run: async () => {} });
+    await mount({ scan, run: async () => {}, stop: () => {} });
     await click(btn(/Connect Gmail/));
     expect(root.textContent).toContain("Scanning your last 90 days of mail…");
     await act(() => report(120, 900));
     expect(root.textContent).toContain("Scanning… 120 of 900 messages");
   });
-  it("warns how many tabs will open for website-only senders", async () => {
+  it("warns how many tabs may open", async () => {
     const web = (name: string): Scored => ({ ...sender(name, true), methods: { url: `https://${name}.co/u` } });
+    const mixed = { ...sender("M", true), methods: { mailto: "mailto:u@m.co", url: "https://m.co" } };
     const run = vi.fn(async () => {});
-    await mount({ scan: async () => [web("W1"), web("W2"), sender("Alpha", true), { ...sender("M", true), methods: { mailto: "mailto:u@m.co", url: "https://m.co" } }], run });
+    await mount({ scan: async () => [web("W1"), web("W2"), sender("Alpha", true), mixed], run, stop: () => {} });
     await click(btn(/Connect Gmail/));
+    await click(btn(/Unsubscribe from/));
+    expect(root.textContent).toContain("Up to 3 tabs may open if a sender's other methods fail.");
+    await click(btn(/^Cancel$/));
+    await click(boxes()[0]!);
+    await click(boxes()[1]!);
+    await click(btn(/Unsubscribe from/));
+    expect(root.textContent).toContain("Up to 1 tab may open if a sender's other methods fail.");
+    await click(btn(/^Cancel$/));
+    await click(boxes()[3]!);
+    await click(boxes()[0]!);
+    await click(boxes()[1]!);
     await click(btn(/Unsubscribe from/));
     expect(root.textContent).toContain("2 of them only offer a website link, so 2 tabs will open for you to finish.");
     await click(btn(/^Cancel$/));
@@ -127,10 +139,39 @@ describe("App", () => {
     await click(btn(/^Cancel$/));
     await click(boxes()[0]!);
     await click(btn(/Unsubscribe from/));
-    expect(root.textContent).not.toContain("website link");
+    expect(root.textContent).not.toContain("tab");
+  });
+  it("counts only one-click and mailto as swept and mentions website entries", async () => {
+    let emit!: (e: LogEntry) => void;
+    let finish!: () => void;
+    const run = vi.fn((_i: Scored[], onEntry: (e: LogEntry) => void) => {
+      emit = onEntry;
+      return new Promise<void>((r) => (finish = r));
+    });
+    await toReview(run);
+    await click(btn(/Unsubscribe from/));
+    await click(btn(/^Unsubscribe$/));
+    const e = (method: LogEntry["method"]): LogEntry => ({ sender: "a", method, at: 1, ok: true });
+    await act(() => { emit(e("one-click")); emit(e("mailto")); emit(e("website")); emit(e("website")); });
+    expect(root.textContent).toContain("Swept: 2");
+    await act(async () => { finish(); await Promise.resolve(); });
+    expect(root.textContent).toContain("Done. Swept: 2");
+    expect(root.textContent).toContain("2 still need you to finish on their website.");
+  });
+  it("Stop button calls stop, and a stopped run says so", async () => {
+    const stop = vi.fn();
+    let finish!: (r: { logErrors: number; stopped: boolean }) => void;
+    const run = vi.fn(() => new Promise<{ logErrors: number; stopped: boolean }>((r) => (finish = r)));
+    await toReview(run as any, stop);
+    await click(btn(/Unsubscribe from/));
+    await click(btn(/^Unsubscribe$/));
+    await click(btn(/^Stop$/));
+    expect(stop).toHaveBeenCalledTimes(1);
+    await act(async () => { finish({ logErrors: 0, stopped: true }); await Promise.resolve(); });
+    expect(root.textContent).toContain("Stopped. Swept: 0");
   });
   it("does not pre-check a sender swept before and badges it", async () => {
-    await mount({ scan: async () => [{ ...sender("Alpha", true), swept: true }, sender("Beta", true)], run: async () => {} });
+    await mount({ scan: async () => [{ ...sender("Alpha", true), swept: true }, sender("Beta", true)], run: async () => {}, stop: () => {} });
     await click(btn(/Connect Gmail/));
     expect(boxes().map((b) => b.checked)).toEqual([false, true]);
     const items = root.querySelectorAll("li");

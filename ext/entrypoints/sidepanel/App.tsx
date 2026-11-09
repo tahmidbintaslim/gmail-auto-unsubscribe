@@ -9,7 +9,8 @@ export class BusyError extends Error {}
 export type Row = Scored & { swept?: boolean };
 export type AppProps = {
   scan: (onProgress?: (done: number, total: number) => void) => Promise<Row[]>;
-  run: (items: Row[], onEntry: (e: LogEntry) => void) => Promise<{ logErrors: number } | void>;
+  run: (items: Row[], onEntry: (e: LogEntry) => void) => Promise<{ logErrors: number; stopped?: boolean } | void>;
+  stop: () => void;
 };
 type View =
   | { s: "signed-out" }
@@ -17,16 +18,17 @@ type View =
   | { s: "review"; list: Row[] }
   | { s: "confirm"; list: Row[] }
   | { s: "running" }
-  | { s: "done"; logErrors: number }
+  | { s: "done"; logErrors: number; stopped: boolean }
   | { s: "error"; auth: boolean; busy?: boolean };
 
 const websiteOnly = (m: Scored["methods"]) => !m.oneClickUrl && !m.mailto && !!m.url;
 const method = (m: Scored["methods"]) => (m.oneClickUrl ? "One-click" : m.mailto ? "Email" : m.url ? "Website" : "None");
 
-export function App({ scan, run }: AppProps) {
+export function App({ scan, run, stop }: AppProps) {
   const [view, setView] = useState<View>({ s: "signed-out" });
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [swept, setSwept] = useState(0);
+  const [website, setWebsite] = useState(0); // ok website entries: the user still has to finish on the site
 
   async function doScan() {
     setView({ s: "scanning" });
@@ -47,10 +49,15 @@ export function App({ scan, run }: AppProps) {
 
   async function doRun(list: Row[]) {
     setSwept(0);
+    setWebsite(0);
     setView({ s: "running" });
     try {
-      const r = await run(pick(list), (e) => { if (e.ok) setSwept((c) => c + 1); });
-      setView({ s: "done", logErrors: r?.logErrors ?? 0 });
+      const r = await run(pick(list), (e) => {
+        if (!e.ok) return;
+        if (e.method === "website") setWebsite((c) => c + 1);
+        else if (e.method === "one-click" || e.method === "mailto") setSwept((c) => c + 1);
+      });
+      setView({ s: "done", logErrors: r?.logErrors ?? 0, stopped: !!r?.stopped });
     } catch (e) {
       setView({ s: "error", auth: e instanceof AuthError, busy: e instanceof BusyError });
     }
@@ -111,22 +118,33 @@ export function App({ scan, run }: AppProps) {
       const text = total > n
         ? `Unsubscribe from the first ${n} of ${total} senders? This can't be undone.`
         : `Unsubscribe from ${n} sender${s}? This can't be undone.`;
-      const k = pick(view.list).filter((x) => websiteOnly(x.methods)).length;
+      const withUrl = pick(view.list).filter((x) => x.methods.url);
+      const k = withUrl.length;
+      const tabs = k === 1 ? "1 tab" : `${k} tabs`;
+      const tabText = withUrl.every((x) => websiteOnly(x.methods))
+        ? `${k} of them only offer a website link, so ${k === 1 ? "1 tab will" : `${k} tabs will`} open for you to finish.`
+        : `Up to ${tabs} may open if a sender's other methods fail.`;
       return (
         <div data-confirm ref={confirmRef} tabIndex={-1} role="alertdialog" aria-label="Confirm unsubscribe" style="padding:14px">
           <p>{text}</p>
-          {k > 0 && <p>{k} of them only offer a website link, so {k === 1 ? "1 tab will" : `${k} tabs will`} open for you to finish.</p>}
+          {k > 0 && <p>{tabText}</p>}
           <button class="primary" onClick={() => doRun(view.list)}>Unsubscribe</button>
           <button onClick={() => setView({ s: "review", list: view.list })}>Cancel</button>
         </div>
       );
     }
     case "running":
-      return <main><p role="status">Swept: {swept}</p></main>;
+      return (
+        <main>
+          <p role="status">Swept: {swept}</p>
+          <button onClick={stop}>Stop</button>
+        </main>
+      );
     case "done":
       return (
         <main>
-          <p role="status">Done. Swept: {swept}</p>
+          <p role="status">{view.stopped ? "Stopped" : "Done"}. Swept: {swept}</p>
+          {website > 0 && <p>{website} still need you to finish on their website.</p>}
           {view.logErrors > 0 && <p role="alert">{view.logErrors} log entries could not be saved.</p>}
         </main>
       );

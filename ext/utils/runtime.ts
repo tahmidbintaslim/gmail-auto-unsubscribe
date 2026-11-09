@@ -21,5 +21,5 @@ export async function appendLog(entry: LogEntry): Promise<void> {
 
 export async function sweptSenders(): Promise<Set<string>> {
   const { log } = await chrome.storage.local.get("log");
-  return new Set(((log as LogEntry[] | undefined) ?? []).filter((e) => e.ok).map((e) => e.sender.toLowerCase()));
+  return new Set(((log as LogEntry[] | undefined) ?? []).filter((e) => e.ok && (e.method === "one-click" || e.method === "mailto")).map((e) => e.sender.toLowerCase()));
 }

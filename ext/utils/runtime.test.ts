@@ -28,14 +28,16 @@ describe("appendLog", () => {
 });
 
 describe("sweptSenders", () => {
-  it("returns lower-cased senders with any ok:true entry", async () => {
+  it("counts only ok one-click or mailto entries", async () => {
     store.log = [
       { sender: "A@x.co", method: "one-click", at: 1, ok: true },
       { sender: "b@x.co", method: "none", at: 2, ok: false },
       { sender: "c@x.co", method: "none", at: 3, ok: false },
       { sender: "c@x.co", method: "website", at: 4, ok: true },
+      { sender: "d@x.co", method: "mailto", at: 5, ok: true },
+      { sender: "e@x.co", method: "mailto", at: 6, ok: false },
     ];
-    expect([...(await sweptSenders())].sort()).toEqual(["a@x.co", "c@x.co"]);
+    expect([...(await sweptSenders())].sort()).toEqual(["a@x.co", "d@x.co"]);
   });
   it("is empty without a log", async () => {
     expect((await sweptSenders()).size).toBe(0);

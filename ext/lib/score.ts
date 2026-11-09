@@ -17,10 +17,10 @@ export function scoreSender(s: SenderStats, now: number): Scored {
   const reasons: string[] = [];
   if (unreadRatio >= 0.8) reasons.push(`You opened ${read} of ${s.messages90d} emails`);
   if (s.messages90d >= 12) reasons.push(`${s.messages90d} emails in 90 days`);
-  if (s.lastOpenedAt == null) reasons.push("Never opened");
+  if (s.lastOpenedAt == null) reasons.push("You haven't read any");
   else {
     const days = daysSince(s.lastOpenedAt, now);
-    if (days >= 60) reasons.push(`Last opened ${days} days ago`);
+    if (days >= 60) reasons.push(`Newest read email is ${days} days old`);
   }
   return { ...s, score, recommend: score >= 0.6, reasons };
 }

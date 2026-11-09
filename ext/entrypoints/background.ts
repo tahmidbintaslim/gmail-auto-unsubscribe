@@ -34,7 +34,9 @@ export default defineBackground(() => {
     const fail = (e: unknown, busy = false) =>
       send({ type: "error", error: busy ? "busy" : e instanceof AuthError ? "auth" : "other" });
 
+    let abort: AbortController | undefined; // aborted only by an explicit stop, never by a disconnect
     port.onMessage.addListener((msg) => {
+      if (msg?.type === "stop") return abort?.abort();
       if (msg?.type === "scan") {
         let sentAt = 0;
         const onProgress = (done: number, total: number) => {
@@ -54,6 +56,7 @@ export default defineBackground(() => {
         if (!Array.isArray(msg.items)) return fail(null);
         if (running) return fail(null, true);
         running = true;
+        const ac = (abort = new AbortController());
         let logErrors = 0;
         const items = msg.items as { sender: string; methods: UnsubMethods }[];
         let done = 0;
@@ -67,9 +70,9 @@ export default defineBackground(() => {
           post, now: Date.now, sendRaw: gmail.sendRaw,
           openTab: async (url: string) => { await chrome.tabs.create({ url }); },
         };
-        runBatch(items, deps, undefined, onEntry)
+        runBatch(items, deps, ac.signal, onEntry)
           .then(() => chain)
-          .then(() => send({ type: "ran", logErrors }))
+          .then(() => send({ type: "ran", logErrors, stopped: ac.signal.aborted }))
           .catch((e) => fail(e))
           .finally(() => { running = false; clearInterval(heartbeat); });
       }

@@ -72,7 +72,7 @@ describe("gmail client", () => {
     const out = await createGmail(getToken, fn, noSleep).listSubscribedSenders(0, (d, t) => progress.push([d, t]));
     expect(out.map((s) => s.email).sort()).toEqual(["a@x.com", "b@x.com"]);
     expect(out.every((s) => s.replied === false && s.lastOpenedAt === null)).toBe(true);
-    expect(progress.at(-1)).toEqual([2, 2]);
+    expect(progress.at(-1)).toEqual([4, 4]); // 2 messages + 2 sender lookups
   });
 
   it("refreshes the token once on 401 then succeeds", async () => {
@@ -103,12 +103,12 @@ describe("gmail client", () => {
     expect(sleep.mock.calls.map((c) => c[0])).toEqual([1000, 2000]);
   });
 
-  it("retries 403 rateLimitExceeded and gives up after 1s,2s,4s", async () => {
+  it("retries 403 rateLimitExceeded and gives up after five retries", async () => {
     const sleep = vi.fn(async (_ms: number) => {});
     const fn = vi.fn(async () => json({ error: { errors: [{ reason: "rateLimitExceeded" }] } }, 403));
     await expect(createGmail(getToken, fn as any, sleep).listSubscribedSenders(0)).rejects.toThrow();
-    expect(sleep.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 4000]);
-    expect(fn).toHaveBeenCalledTimes(4);
+    expect(sleep.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 4000, 8000, 16000]);
+    expect(fn).toHaveBeenCalledTimes(6);
   });
 
   it("retries 5xx: 500, 500, then 200 succeeds after 2 retries", async () => {
@@ -121,10 +121,10 @@ describe("gmail client", () => {
     expect(sleep.mock.calls.map((c) => c[0])).toEqual([1000, 2000]);
   });
 
-  it("gives up after 503 four times", async () => {
+  it("gives up after 503 six times", async () => {
     const fn = vi.fn(async () => json({}, 503));
     await expect(createGmail(getToken, fn as any, noSleep).listSubscribedSenders(0)).rejects.toThrow(/503/);
-    expect(fn).toHaveBeenCalledTimes(4);
+    expect(fn).toHaveBeenCalledTimes(6);
   });
 
   it("skips a message deleted between list and get (404)", async () => {
@@ -135,7 +135,7 @@ describe("gmail client", () => {
     const progress: number[][] = [];
     const out = await createGmail(getToken, fn, noSleep).listSubscribedSenders(0, (d, t) => progress.push([d, t]));
     expect(out.map((s) => s.email).sort()).toEqual(["a@x.com", "b@x.com"]);
-    expect(progress.at(-1)).toEqual([3, 3]);
+    expect(progress.at(-1)).toEqual([5, 5]);
   });
 
   it("does not retry a plain 403", async () => {
@@ -183,5 +183,58 @@ describe("gmail client", () => {
     expect(err.cause).toBe(boom);
     const err2 = await createGmail(async () => { throw boom; }, fn as any, noSleep).sendRaw("x").catch((e) => e);
     expect(err2).toBeInstanceOf(AuthError);
+  });
+
+  it("shares one token refresh across concurrent 401s", async () => {
+    const ids = Array.from({ length: 10 }, (_, i) => `m${i}`);
+    const tok = vi.fn(async (o: { refresh: boolean }) => (o.refresh ? "new" : "old"));
+    const fn = (async (url: string, init?: RequestInit) => {
+      const u = new URL(url);
+      if (u.pathname.endsWith("/messages")) return json(u.searchParams.get("q")?.startsWith("in:sent") ? {} : { messages: ids.map((id) => ({ id })) });
+      await new Promise((r) => setTimeout(r, 1));
+      const auth = (init!.headers as Record<string, string>).Authorization;
+      return auth === "Bearer old" ? json({}, 401) : json(msg("x", "a@x.com", 1, true));
+    }) as unknown as typeof fetch;
+    const out = await createGmail(tok, fn, noSleep).listSubscribedSenders(0);
+    expect(out).toHaveLength(1);
+    expect(tok.mock.calls.filter((c) => c[0].refresh)).toHaveLength(1);
+  });
+
+  it("honors Retry-After seconds, capped at 32s", async () => {
+    const sleep = vi.fn(async (_ms: number) => {});
+    const fn = vi.fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 429, headers: { "Retry-After": "3" } }))
+      .mockResolvedValueOnce(new Response("{}", { status: 503, headers: { "Retry-After": "100" } }))
+      .mockResolvedValueOnce(json({}));
+    await createGmail(getToken, fn as any, sleep).listSubscribedSenders(0);
+    expect(sleep.mock.calls.map((c) => c[0])).toEqual([3000, 32000]);
+  });
+
+  it("parses From as an addr-spec and groups by address", async () => {
+    const msgs = {
+      a: msg("a", "news@shop.com (Shop News)", 1, true),
+      b: msg("b", '"Shop" <News@Shop.com>', 2, true),
+      c: msg("c", "NEWS@shop.com", 3, true),
+      d: msg("d", "garbage with no address", 4, true),
+      e: msg("e", "Other <o@y.com>", 5, true),
+    };
+    const { fn, calls } = fakeFetch({ pages: [["a", "b", "c", "d", "e"]], msgs });
+    const out = await createGmail(getToken, fn, noSleep).listSubscribedSenders(0);
+    const shop = out.find((s) => s.email === "news@shop.com")!;
+    expect(out).toHaveLength(2);
+    expect(shop.messages90d).toBe(3);
+    expect(shop.domain).toBe("shop.com");
+    expect(["Shop", "Shop News"]).toContain(shop.name);
+    expect(out.find((s) => s.email === "o@y.com")!.name).toBe("Other");
+    const q = calls.map((c) => new URL(c.url).searchParams.get("q")).filter((q) => q?.startsWith("in:sent"));
+    expect(q).toContain('in:sent newer_than:365d to:"news@shop.com"');
+  });
+
+  it("names a bare address by its comment, else by the address", async () => {
+    const msgs = { a: msg("a", "news@shop.com (Shop News)", 1, true), b: msg("b", "bare@x.com", 1, true) };
+    const { fn } = fakeFetch({ pages: [["a", "b"]], msgs });
+    const out = await createGmail(getToken, fn, noSleep).listSubscribedSenders(0);
+    expect(out.find((s) => s.email === "news@shop.com")!.name).toBe("Shop News");
+    expect(out.find((s) => s.email === "bare@x.com")!.name).toBe("bare@x.com");
   });
 });

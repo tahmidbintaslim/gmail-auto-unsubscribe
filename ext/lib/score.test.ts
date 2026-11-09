@@ -23,7 +23,7 @@ describe("scoreSender", () => {
     const r = scoreSender(sender({ messages90d: 30, unread: 30, lastOpenedAt: null }), NOW);
     expect(r.score).toBe(1);
     expect(r.recommend).toBe(true);
-    expect(r.reasons).toEqual(["You opened 0 of 30 emails", "30 emails in 90 days", "Never opened"]);
+    expect(r.reasons).toEqual(["You opened 0 of 30 emails", "30 emails in 90 days", "You haven't read any"]);
   });
 
   it("low-volume sender opened today scores 0.03 and gets no reasons", () => {
@@ -50,9 +50,9 @@ describe("scoreSender", () => {
     expect(r.recommend).toBe(false);
   });
 
-  it("reports 'Last opened N days ago' from 60 days on", () => {
+  it("reports 'Newest read email is N days old' from 60 days on", () => {
     const r = scoreSender(sender({ messages90d: 1, lastOpenedAt: NOW - 60 * DAY }), NOW);
-    expect(r.reasons).toEqual(["Last opened 60 days ago"]);
+    expect(r.reasons).toEqual(["Newest read email is 60 days old"]);
   });
 });
 
