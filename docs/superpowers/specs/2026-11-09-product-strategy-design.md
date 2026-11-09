@@ -1,32 +1,41 @@
-# Shoo — Product Strategy Design
+# UnsubSweep — Product Strategy Design
 
-Date: 2026-11-09 · Status: draft for review · Sub-project 1 of 6
+Date: 2026-11-09 (rev. 2: phased strategy and name) · Sub-project 1 of 6
 
 ## 0. Decisions so far
 
 | Question | Decision |
 |---|---|
-| Goal | Commercial product |
-| Architecture | **Local-first**: Gmail API read in the browser, AI on-device or user's own key, no mail data on our servers |
+| Goal | Commercial product, launched in **two phases** |
+| Phase 1 (v1) | **Free, open source, zero access.** The existing page-clicking engine ships to the Chrome Web Store with only `activeTab` + `scripting`: no OAuth, no host permission, no network. Wins trust and users fast. |
+| Phase 2 (v2) | **Opt-in Pro**: Gmail API read in the browser, AI on-device or user's own key, no mail data on our servers. The free core keeps its zero-access promise. |
 | Audience | Consumers first (personal Gmail), Workspace/team plan later |
-| AI in v1 | Smart recommendations, sender categories, natural-language rules, newsletter digest (opt-in) |
-| Working name | **Shoo** — "AI unsubscribe for Gmail" (pending trademark check, §6) |
+| AI (v2) | Smart recommendations, sender categories, natural-language rules, newsletter digest (opt-in) |
+| Name | **UnsubSweep**: "Bulk unsubscribe for Gmail" (v1), "AI inbox sweep" (v2) |
+
+**Name check (2026-11-09):** existing "Unsub" products we must not collide with: Unsub (iOS subscription tracker, Product Hunt), Unsubly (Chrome Web Store), Unsubby (subscription-cancelling service), UnSubAll, EasyUnsub, Unsubmarine, Unsubscriber (Clean Email). A web search found no product called UnsubSweep. An RDAP lookup found `unsubsweep.com` and `unsubsweep.app` unregistered. A formal trademark search is still open **[verify]**.
+
+**The prototype engine replaces the external "UnsubLocal" blueprint code.** The repo's engine already handles the blueprint's five Gmail gotchas, and the blueprint code has four problems we won't ship:
+- It runs on every Gmail page with no address check, so it can click Unsubscribe inside an open message.
+- "Go to website" is on by default with no cap on tabs.
+- It confirms dialogs it did not open.
+- It needs the `mail.google.com/*` host permission, which shows an install warning.
 
 Unverified assumptions are marked **[verify]**. Each one is a task in the plan.
 
 ## 1. Product
 
-**One-liner:** Shoo finds the senders you never read and unsubscribes you in one click. It never sends your email to anyone.
+**One-liner:** UnsubSweep finds the senders you never read and unsubscribes you in one click. It never sends your email to anyone.
 
 **Problem:** Inboxes fill with newsletters and promotions. The existing tools either sold user data (Unroll.me) or run your mail through their servers (Clean Email, Leave Me Alone, Mailstrom). Gmail's own Manage subscriptions page has no ranking, no bulk action and no rules.
 
 **Positioning:** *The unsubscribe assistant that never sees your email.* All mail processing happens in your browser. Our only server handles license keys.
 
-**Tiers (open-core):**
+**Tiers (open-core).** Phase 1 ships only the Free column's first row; everything else is phase 2.
 
 | | Free | Pro (~$4/mo or $29/yr) | Team (later) |
 |---|---|---|---|
-| Quick mode (today's page-clicking engine, no Google sign-in) | ✓ | ✓ | ✓ |
+| Quick mode (today's page-clicking engine, no Google sign-in, zero access) | ✓ unlimited | ✓ | ✓ |
 | One-click unsubscribe through the Gmail API | 20 / month | Unlimited | Unlimited |
 | AI recommendations + categories | Preview (top 5) | ✓ | ✓ |
 | Natural-language rules (recurring) | – | ✓ | ✓ |
@@ -73,7 +82,7 @@ Unverified assumptions are marked **[verify]**. Each one is a task in the plan.
 
 | Piece | v1? | Design |
 |---|---|---|
-| **MCP server** (`@shoo/mcp`, local stdio, Node) | ✓ | Same scoring and executor code as a shared TS package. Signs in with an OAuth "Desktop app" client in the **same Google Cloud project**, so one verification covers both **[verify]**. Tools: `list_subscriptions`, `recommend_unsubscribes`, `categorize_senders`, `unsubscribe` (needs `confirm: true` and a sender list), `digest_newsletters`. Pro license key checked at startup. |
+| **MCP server** (`@unsubsweep/mcp`, local stdio, Node) | ✓ | Same scoring and executor code as a shared TS package. Signs in with an OAuth "Desktop app" client in the **same Google Cloud project**, so one verification covers both **[verify]**. Tools: `list_subscriptions`, `recommend_unsubscribes`, `categorize_senders`, `unsubscribe` (needs `confirm: true` and a sender list), `digest_newsletters`. Pro license key checked at startup. |
 | **Claude Skill** (`inbox-cleanup/SKILL.md`) | ✓ | Teaches Claude the workflow: list → explain recommendations → ask the user → unsubscribe in batches → report. Never unsubscribes without explicit confirmation. |
 | **Claude Code plugin** | ✓ | Bundles the MCP config and the skill so they install with one command. |
 | **claude.ai remote connector** | ✗ (phase B) | Needs a hosted server holding Gmail tokens, which breaks local-first and triggers CASA. Revisit after there is revenue. |
@@ -90,7 +99,11 @@ Unverified assumptions are marked **[verify]**. Each one is a task in the plan.
   - Pro features (rules, digest, licensing) sit in a separate proprietary package.
   - Contributions use DCO sign-off, not a CLA.
   - Add `SECURITY.md` and a responsible-disclosure address.
-- **Trademark:** clear "Shoo" with USPTO, EUIPO and store searches and check domain availability (shoo.app, getshoo.com) before any branding work **[verify]**.
+- **Trademark:** run a USPTO and EUIPO search on "UnsubSweep" and register `unsubsweep.com` and `unsubsweep.app` before any public launch **[verify]**.
+- **Phase 1 privacy policy:** zero collection, zero network, and no storage beyond the run counts kept in memory. **Do not** cite Google API Limited Use in phase 1, because no Google API is used. Add it in phase 2.
+- **Chrome Web Store trader status:**
+  - Phase 1 is free with no monetization, so "non-trader" is accurate.
+  - Before Pro launches, switch to **trader**: EU rules then show a business address and contact on the listing. Plan for a business address or registered company so it isn't a home address.
 
 ## 5. User research plan
 
@@ -103,13 +116,14 @@ Synthesize into personas and a ranked pain list; that feeds sub-project 2.
 
 ## 6. Branding and marketing
 
-- **Voice:** friendly, calm, a little cheeky ("Shoo, newsletter."). Never "productivity hustle".
-- **Visual direction (detailed in sub-project 2):** one warm accent color, a hand-wave or broom mark, and a big counter of senders shooed as the hero moment.
+- **Voice:** friendly, calm, a little cheeky ("Swept: 143 senders."). Never "productivity hustle".
+- **Wedge (phase 1):** *zero access, local-first*. "Bulk unsubscribe without giving anyone your inbox." Use the HN, X and Product Hunt playbook from the UnsubLocal research, renamed.
+- **Visual direction (detailed in sub-project 2):** one warm accent color, a broom mark, and a big counter of senders swept as the hero moment.
 - **Launch:**
   - Chrome Web Store SEO: "unsubscribe Gmail", "bulk unsubscribe".
   - Show HN and Product Hunt with the privacy story and an architecture diagram.
   - Reddit posts that lead with value.
-  - A shareable "I shooed 143 senders" card.
+  - A shareable "I swept 143 senders" card.
 - **Ongoing:**
   - SEO pages "How to unsubscribe from {brand}", generated for the most common senders.
   - The open-source repo as a trust signal.
@@ -117,14 +131,14 @@ Synthesize into personas and a ranked pain list; that feeds sub-project 2.
 
 ## 7. Sub-project roadmap
 
-| # | Sub-project | Depends on | Rough size |
-|---|---|---|---|
-| 1 | Product strategy (this doc) | – | done on approval |
-| 2 | Brand and design system (name clearance, logo, tokens, store assets, landing page) | 1 | 1–2 wk |
-| 3 | Extension v2 core: WXT migration, OAuth, Gmail client, executor, scoring, review UI. **Start OAuth verification here** | 1 | 3–4 wk |
-| 4 | AI layer: adapter, categories, explanations, NL rules, digest, licensing | 3 | 3 wk |
-| 5 | MCP server, Skill and Claude Code plugin | 3 (shared package) | 1–2 wk |
-| 6 | Launch: legal pages, store listing, verification sign-off, marketing | 2, 4 | 2 wk |
+| # | Sub-project | Phase | Depends on | Rough size |
+|---|---|---|---|---|
+| 1 | Product strategy (this doc) | – | – | done |
+| 2 | **Brand + v1 launch:** name clearance, logo/icons, tokens, popup restyle, store listing, privacy policy page, landing page, launch posts | 1 | 1 | 1–2 wk |
+| 3 | **Extension v2 core:** WXT migration, OAuth, Gmail client, executor, scoring, review UI. **Start OAuth verification here** | 2 | 1 (runs in parallel with 2) | 3–4 wk |
+| 4 | AI layer: adapter, categories, explanations, NL rules, digest, licensing | 2 | 3 | 3 wk |
+| 5 | MCP server, Skill and Claude Code plugin | 2 | 3 (shared package) | 1–2 wk |
+| 6 | Pro launch: trader status, Pro privacy policy, verification sign-off, marketing | 2 | 4 | 2 wk |
 
 User research (§5) runs alongside 2 and 3.
 
