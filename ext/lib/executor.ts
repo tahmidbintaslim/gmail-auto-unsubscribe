@@ -1,3 +1,4 @@
+import { AuthError } from "./gmail";
 import type { UnsubMethods } from "./listUnsubscribe";
 
 export type LogEntry = { sender: string; method: "one-click" | "mailto" | "website" | "none"; at: number; ok: boolean };
@@ -35,7 +36,7 @@ export async function unsubscribeOne(sender: string, m: UnsubMethods, deps: Exec
   }
   const raw = m.mailto ? buildMailto(m.mailto) : null;
   if (raw) {
-    try { await deps.sendRaw(raw); return done("mailto", true); } catch { /* fall through */ }
+    try { await deps.sendRaw(raw); return done("mailto", true); } catch (e) { if (e instanceof AuthError) throw e; /* else fall through */ }
   }
   if (m.url) {
     try { await deps.openTab(m.url); return done("website", true); } catch { /* fall through */ }

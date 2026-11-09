@@ -1,5 +1,5 @@
 import { render } from "preact";
-import { App } from "./App";
+import { App, BusyError } from "./App";
 import { AuthError } from "../../lib/gmail";
 import type { Scored } from "../../lib/score";
 import type { LogEntry } from "../../lib/executor";
@@ -19,6 +19,7 @@ async function run(items: Scored[], onEntry: (e: LogEntry) => void): Promise<voi
   chrome.runtime.onMessage.addListener(listener);
   try {
     const r = await chrome.runtime.sendMessage({ type: "run", items: items.map((s) => ({ sender: s.email, methods: s.methods })) });
+    if (r?.error === "busy") throw new BusyError();
     if (r?.error) throw r.error === "auth" ? new AuthError("auth") : new Error("run failed");
   } finally {
     chrome.runtime.onMessage.removeListener(listener);

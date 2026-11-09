@@ -9,6 +9,7 @@ export async function post(url: string): Promise<void> {
     mode: "no-cors",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: "List-Unsubscribe=One-Click",
+    signal: AbortSignal.timeout(15000),
   });
 }
 

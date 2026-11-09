@@ -1,7 +1,9 @@
-import { useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { AuthError } from "../../lib/gmail";
 import type { Scored } from "../../lib/score";
-import type { LogEntry } from "../../lib/executor";
+import { MAX_PER_RUN, type LogEntry } from "../../lib/executor";
+
+export class BusyError extends Error {}
 
 export type AppProps = {
   scan: () => Promise<Scored[]>;
@@ -11,9 +13,10 @@ type View =
   | { s: "signed-out" }
   | { s: "scanning" }
   | { s: "review"; list: Scored[] }
+  | { s: "confirm"; list: Scored[] }
   | { s: "running" }
   | { s: "done" }
-  | { s: "error"; auth: boolean };
+  | { s: "error"; auth: boolean; busy?: boolean };
 
 const method = (m: Scored["methods"]) => (m.oneClickUrl ? "One-click" : m.mailto ? "Email" : m.url ? "Website" : "None");
 
@@ -33,17 +36,18 @@ export function App({ scan, run }: AppProps) {
     }
   }
 
+  const confirmRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (view.s === "confirm") confirmRef.current?.focus(); }, [view.s]);
+
   async function doRun(list: Scored[]) {
-    const picked = list.filter((x) => checked.has(x.email));
-    const n = picked.length;
-    if (!confirm(`Unsubscribe from ${n} sender${n === 1 ? "" : "s"}? This can't be undone.`)) return;
+    const picked = list.filter((x) => checked.has(x.email)).slice(0, MAX_PER_RUN);
     setSwept(0);
     setView({ s: "running" });
     try {
       await run(picked, () => setSwept((c) => c + 1));
       setView({ s: "done" });
     } catch (e) {
-      setView({ s: "error", auth: e instanceof AuthError });
+      setView({ s: "error", auth: e instanceof AuthError, busy: e instanceof BusyError });
     }
   }
 
@@ -66,7 +70,7 @@ export function App({ scan, run }: AppProps) {
     case "scanning":
       return <main><p role="status">Scanning your last 90 days of mail…</p></main>;
     case "review": {
-      const n = checked.size;
+      const n = Math.min(checked.size, MAX_PER_RUN);
       return (
         <main>
           <h1>Review senders</h1>
@@ -82,10 +86,25 @@ export function App({ scan, run }: AppProps) {
               </li>
             ))}
           </ul>
-          <button class="primary" disabled={n === 0} onClick={() => doRun(view.list)}>
+          <button class="primary" disabled={n === 0} onClick={() => setView({ s: "confirm", list: view.list })}>
             Unsubscribe from {n} sender{n === 1 ? "" : "s"}
           </button>
         </main>
+      );
+    }
+    case "confirm": {
+      const total = checked.size;
+      const n = Math.min(total, MAX_PER_RUN);
+      const s = n === 1 ? "" : "s";
+      const text = total > n
+        ? `Unsubscribe from the first ${n} of ${total} senders? This can't be undone.`
+        : `Unsubscribe from ${n} sender${s}? This can't be undone.`;
+      return (
+        <div data-confirm ref={confirmRef} tabIndex={-1} role="alertdialog" aria-label="Confirm unsubscribe" style="padding:14px">
+          <p>{text}</p>
+          <button class="primary" onClick={() => doRun(view.list)}>Unsubscribe</button>
+          <button onClick={() => setView({ s: "review", list: view.list })}>Cancel</button>
+        </div>
       );
     }
     case "running":
@@ -95,7 +114,7 @@ export function App({ scan, run }: AppProps) {
     case "error":
       return (
         <main>
-          <p role="alert">{view.auth ? "Gmail sign-in failed or expired." : "Something went wrong."}</p>
+          <p role="alert">{view.busy ? "A sweep is already running in another window." : view.auth ? "Gmail sign-in failed or expired." : "Something went wrong."}</p>
           <button class="primary" onClick={doScan}>{view.auth ? "Sign in again" : "Try again"}</button>
         </main>
       );

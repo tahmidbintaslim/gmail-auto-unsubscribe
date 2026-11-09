@@ -16,20 +16,25 @@ async function getToken({ refresh }: { refresh: boolean }): Promise<string> {
 
 export default defineBackground(() => {
   const gmail = createGmail(getToken);
-  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
+  let running = false; // one sweep at a time, across windows
 
-  chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
+  chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+    if (sender.id !== chrome.runtime.id) return;
     if (msg?.type === "scan") {
       gmail.listSubscribedSenders(Date.now())
         .then((l) => reply(rankSenders(l, Date.now())))
         .catch((e) => reply({ error: e instanceof AuthError ? "auth" : "other" }));
       return true;
     }
-    if (msg?.type === "run") {
+    if (msg?.type === "run" && Array.isArray(msg.items)) {
+      if (running) { reply({ error: "busy" }); return; }
+      running = true;
+      let logErrors = 0;
       const items = msg.items as { sender: string; methods: UnsubMethods }[];
       let chain: Promise<void> = Promise.resolve(); // appendLog is read-modify-write: serialize
       const onEntry = (entry: LogEntry) => {
-        chain = chain.then(() => appendLog(entry)).catch(() => {});
+        chain = chain.then(() => appendLog(entry)).catch((e) => { logErrors++; console.error("appendLog failed", e); });
         chrome.runtime.sendMessage({ type: "entry", entry }).catch(() => {});
       };
       const deps = {
@@ -38,8 +43,9 @@ export default defineBackground(() => {
       };
       runBatch(items, deps, undefined, onEntry)
         .then(() => chain)
-        .then(() => reply({ ok: true }))
-        .catch((e) => reply({ error: e instanceof AuthError ? "auth" : "other" }));
+        .then(() => reply({ ok: true, logErrors }))
+        .catch((e) => reply({ error: e instanceof AuthError ? "auth" : "other", logErrors }))
+        .finally(() => { running = false; });
       return true;
     }
   });

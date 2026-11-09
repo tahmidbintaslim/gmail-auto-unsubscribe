@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { AuthError } from "./gmail";
 import { unsubscribeOne, runBatch, MAX_PER_RUN, type ExecDeps } from "./executor";
 
 const mk = (o: Partial<ExecDeps> = {}): ExecDeps => ({
@@ -89,5 +90,21 @@ describe("runBatch", () => {
     const out = await runBatch([...items(2), ...items(2)], d);
     expect(out).toHaveLength(2);
     expect(d.openTab).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("auth expiry mid-run", () => {
+  it("rethrows AuthError from sendRaw without opening a tab", async () => {
+    const d = mk({ sendRaw: vi.fn(async () => { throw new AuthError("expired"); }) });
+    await expect(unsubscribeOne("a", { mailto: "mailto:u@a.co", url: "https://x" }, d)).rejects.toBeInstanceOf(AuthError);
+    expect(d.openTab).not.toHaveBeenCalled();
+  });
+  it("runBatch stops at that sender", async () => {
+    const sendRaw = vi.fn(async () => { throw new AuthError("expired"); });
+    const d = mk({ sendRaw });
+    const its = [1, 2, 3].map((i) => ({ sender: `s${i}`, methods: { mailto: "mailto:u@a.co", url: "https://x" } }));
+    await expect(runBatch(its, d)).rejects.toBeInstanceOf(AuthError);
+    expect(sendRaw).toHaveBeenCalledTimes(1);
+    expect(d.openTab).not.toHaveBeenCalled();
   });
 });

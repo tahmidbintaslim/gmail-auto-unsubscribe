@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render } from "preact";
 import { act } from "preact/test-utils";
-import { App, type AppProps } from "./App";
+import { App, BusyError, type AppProps } from "./App";
 import { AuthError } from "../../lib/gmail";
 import type { Scored } from "../../lib/score";
 import type { LogEntry } from "../../lib/executor";
@@ -47,17 +47,35 @@ describe("App", () => {
     for (const b of boxes().filter((b) => b.checked)) await click(b);
     expect((btn(/Unsubscribe from/) as HTMLButtonElement).disabled).toBe(true);
   });
-  it("does not run when confirm is declined", async () => {
-    const confirm = vi.fn(() => false);
-    vi.stubGlobal("confirm", confirm);
+  it("Cancel in the confirm view does not run", async () => {
     const run = vi.fn(async () => {});
     await toReview(run);
     await click(btn(/Unsubscribe from/));
-    expect(confirm).toHaveBeenCalledWith("Unsubscribe from 2 senders? This can't be undone.");
+    expect(root.textContent).toContain("Unsubscribe from 2 senders? This can't be undone.");
+    expect(document.activeElement?.closest("[data-confirm]")).toBeTruthy();
+    await click(btn(/^Cancel$/));
     expect(run).not.toHaveBeenCalled();
+    expect(btn(/Unsubscribe from 2 senders/)).toBeTruthy();
+  });
+  it("caps at 250 and says so", async () => {
+    const many = Array.from({ length: 260 }, (_, i) => sender(`S${i}`, true));
+    const run = vi.fn(async (_i: Scored[], _o: (e: LogEntry) => void) => {});
+    await mount({ scan: async () => many, run });
+    await click(btn(/Connect Gmail/));
+    expect(btn(/Unsubscribe from/).textContent).toBe("Unsubscribe from 250 senders");
+    await click(btn(/Unsubscribe from/));
+    expect(root.textContent).toContain("Unsubscribe from the first 250 of 260 senders? This can't be undone.");
+    await click(btn(/^Unsubscribe$/));
+    expect(run.mock.calls[0]![0]).toHaveLength(250);
+  });
+  it("shows busy message when another window is sweeping", async () => {
+    const run = vi.fn(async () => { throw new BusyError(); });
+    await toReview(run);
+    await click(btn(/Unsubscribe from/));
+    await click(btn(/^Unsubscribe$/));
+    expect(root.textContent).toContain("A sweep is already running in another window.");
   });
   it("runs checked senders, shows Swept counter, then done", async () => {
-    vi.stubGlobal("confirm", () => true);
     let emit!: (e: LogEntry) => void;
     let finish!: () => void;
     const run = vi.fn((items: Scored[], onEntry: (e: LogEntry) => void) => {
@@ -66,6 +84,7 @@ describe("App", () => {
     });
     await toReview(run);
     await click(btn(/Unsubscribe from/));
+    await click(btn(/^Unsubscribe$/));
     expect(run.mock.calls[0]![0].map((s) => s.name)).toEqual(["Alpha", "Beta"]);
     const e = (sender: string): LogEntry => ({ sender, method: "one-click", at: 1, ok: true });
     await act(() => { emit(e("a")); emit(e("b")); });
