@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UnsubSweep Privacy Policy</title>
+  <link rel="icon" href="/icons/icon48.png">
+  <link rel="stylesheet" href="/site/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/"><img src="/icons/icon128.png" alt=""> UnsubSweep</a>
+      <nav><a href="/demo/">Demo</a><a href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe">GitHub</a></nav>
+    </header>
+  </div>
+
+  <main class="doc">
+    <h1>Privacy policy</h1>
+    <p>Effective 9 November 2026. This policy covers the UnsubSweep Chrome extension.</p>
+
+    <p><strong>In short: UnsubSweep collects no data.</strong> It stores nothing, sends nothing anywhere, and has no servers, analytics or trackers.</p>
+
+    <h2>What it does</h2>
+    <p>UnsubSweep has one purpose: on Gmail's Manage subscriptions page, it clicks Unsubscribe for each sender in turn and confirms Gmail's dialog, after you press Start.</p>
+
+    <h2>What it reads</h2>
+    <p>Only while a run is going, and only on the Manage subscriptions page of the Gmail tab you started it from, it reads button and link labels, the text of sender rows, the tab's address, and the address of a "Go to website" link it is about to open (only if you turned that option on).</p>
+    <p>It never opens, reads, moves, labels or deletes your email. It does not read cookies, and it holds no password, token or API key.</p>
+
+    <h2>What it stores and sends</h2>
+    <p>Nothing. The run's counts live in memory and disappear when the tab closes. The extension makes no network requests of its own, loads no remote code, and sends us nothing.</p>
+    <p>One exception you control: if you turn on the Go to website option, clicking Gmail's "Go to website" opens the sender's own page in a new tab (at most 5 per run). That page is the sender's, under their privacy policy, and it may know which address it is unsubscribing.</p>
+
+    <h2>Permissions</h2>
+    <table id="permissions">
+      <thead><tr><th>Permission</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><code>activeTab</code></td><td>Gives access to the Gmail tab you opened the popup from, and only when you open it. No other tab or site.</td></tr>
+        <tr><td><code>scripting</code></td><td>Adds the unsubscribe loop to that tab when you press Start. Nothing runs in Gmail before that.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Changes</h2>
+    <p>If a future version handles data differently, this page will say so before that version ships, with a new effective date.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or concerns: open an issue at <a href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/issues">github.com/tahmidbintaslim/gmail-auto-unsubscribe/issues</a>.</p>
+  </main>
+</body>
+</html>

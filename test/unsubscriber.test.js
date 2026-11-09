@@ -327,7 +327,7 @@ describe("describeState", () => {
     [{ phase: "idle" }, "Ready"],
     [{ phase: "wrong-page" }, "Open Gmail's Manage subscriptions page first."],
     [{ phase: "running", ...counts }, "Running: 3 unsubscribed, 1 skipped."],
-    [{ phase: "done", ...counts, websites: 1 }, "Done: 3 unsubscribed, 1 skipped, 1 website opened."],
+    [{ phase: "done", ...counts, websites: 1 }, "Swept: 3 unsubscribed, 1 skipped, 1 website opened."],
     [{ phase: "stopped", ...counts }, "Stopped: 3 unsubscribed, 1 skipped."],
     [{ phase: "limit", ...counts }, "Paused after 250 senders: 3 unsubscribed, 1 skipped. Press Start to continue."],
     [{ phase: "left-page", ...counts }, "Stopped because you left the subscriptions page: 3 unsubscribed, 1 skipped."],

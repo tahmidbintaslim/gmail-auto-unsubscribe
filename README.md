@@ -1,13 +1,13 @@
-# Gmail Auto Unsubscribe
+# UnsubSweep
 
 [![CI](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A Chrome extension (Manifest V3) that works through Gmail's Manage subscriptions page for you: it clicks Unsubscribe for each sender and confirms Gmail's dialog. It uses no Gmail API, no OAuth and no server; it clicks in the Gmail tab you already have open.
+**UnsubSweep** is a Chrome extension (Manifest V3) that works through Gmail's Manage subscriptions page for you: it clicks Unsubscribe for each sender and confirms Gmail's dialog. It uses no Gmail API, no OAuth and no server; it clicks in the Gmail tab you already have open.
 
-**Status: prototype.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. It has no Chrome Web Store listing; you install it with Load unpacked.
+**Status: preparing v1 for the Chrome Web Store.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. Until the listing is live, install it with Load unpacked. Website and privacy policy: [`site/`](site/) (served at `/` and `/privacy`).
 
-![The extension's popup showing "Running: 1 unsubscribed, 1 skipped." next to a stand-in subscriptions list with an "Unsubscribe from Example Club?" dialog open](docs/images/demo-running.png)
+![The UnsubSweep popup showing "Running: 1 unsubscribed, 0 skipped." next to a stand-in subscriptions list with four senders left](docs/images/demo-running.png)
 
 *The extension's own popup and loop, running in [`demo/`](demo/) against the hand-written test fixture. This is not real Gmail.*
 
@@ -56,7 +56,7 @@ sequenceDiagram
 
 ## When a run stops
 
-- No sender is left that the run has not tried (**Done**).
+- No sender is left that the run has not tried (**Swept**).
 - You press **Stop**.
 - The tab leaves the Manage subscriptions list, for example when you open a message or the inbox.
 - 250 senders in one run. Press **Start** again to continue with the rest.
@@ -123,7 +123,7 @@ There is no build step: Chrome loads the source files as they are. You do not ne
 ## Use
 
 1. Open Gmail in Chrome and go to **Manage subscriptions** in the left menu (Gmail may list it under **More**). If your account does not show that page, the extension has nothing to work on.
-2. Click the extension icon, then **Start Unsubscribing**.
+2. Click the UnsubSweep icon, then **Start sweep**.
 3. Leave the Gmail tab alone while it runs. Press **Stop** at any time.
 
 The extension matches Gmail's English labels (Unsubscribe, Cancel, Go to website). With Gmail set to another language it finds nothing to click.
@@ -139,15 +139,15 @@ npm run demo        # serves the repo on http://localhost:8000 (PORT=... to chan
 # or: python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000/demo/> and press **Start Unsubscribing**. **Reset** reloads the list.
+Then open <http://localhost:8000/demo/> and press **Start sweep**. **Reset** reloads the list.
 
-![The same demo after the run: the popup shows "Done: 4 unsubscribed, 1 skipped." and only Example Travel, the website-only sender, is left in the list](docs/images/demo-done.png)
+![The same demo after the run: the popup shows "Swept: 4 unsubscribed, 1 skipped." and only Example Travel, the website-only sender, is left in the list](docs/images/demo-done.png)
 
 A full run, recorded with Playwright from `npm run demo` (15 seconds):
 
-![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Done: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
+![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Swept: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
 
-Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (the same page, served by Vercel from `vercel.json`, with `/` going to `/demo/`). It is the stand-in demo, not Gmail.
+Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (served by Vercel from `vercel.json`: `/` is the landing page, `/demo/` this demo, `/privacy` the privacy policy). The demo is a stand-in, not Gmail.
 
 The demo is a way to watch the loop, not evidence that it works on real Gmail: it uses the same stand-in markup as the tests.
 
@@ -186,11 +186,16 @@ test/                 Vitest + jsdom tests; fixtures/ holds the stand-in Gmail m
 demo/                 Browser demo of the real files against the fixtures (not shipped)
 scripts/serve-demo.mjs  Dependency-free local server for the demo (npm run demo)
 docs/images/          README screenshots, captured from demo/
+icons/, brand/        Toolbar and store icons; brand/mark.svg is the source (npm run icons)
+site/                 Landing page and privacy policy (not shipped in the extension)
+scripts/package.mjs   Builds the Chrome Web Store zip (npm run package)
 ```
 
 ## Deployment
 
-Not published. The extension is installed with Load unpacked from a clone of `main`; there is no Chrome Web Store listing, release package or hosted service. Before any listing, the name would need checking against Google's branding rules for the word "Gmail".
+- **Extension:** `npm run package` writes `dist/unsubsweep-<version>.zip` with only the shipped files. Upload it with the copy in [`docs/store-listing.md`](docs/store-listing.md). The name uses "for Gmail" only, per Google's branding rules.
+- **Website:** Vercel serves the repository as static files: `/` is [`site/index.html`](site/index.html), `/privacy` is [`site/privacy.html`](site/privacy.html), and `/demo/` is the demo.
+- **Launch posts:** [`docs/launch.md`](docs/launch.md).
 
 ## Manual test on real Gmail
 
@@ -206,7 +211,7 @@ Testing on real Gmail is still manual. Use a test account with a few newsletters
 - [ ] Stop during a run: no clicks after the current sender.
 - [ ] Opening a message during a run: the run stops with "left the subscriptions page" and nothing in the message is clicked.
 - [ ] Closing and reopening the popup during a run: the counts are still shown.
-- [ ] An empty list: Start reports Done with zero counts.
+- [ ] An empty list: Start reports "Swept: 0 unsubscribed, 0 skipped."
 - [ ] A long list: senders Gmail loads as you scroll are processed. This is not verified yet; if some are missed, note it and press Start again.
 - [ ] Save an anonymized copy of the real page and both dialog types to `test/fixtures/` to replace the hand-written ones.
 
