@@ -1,3 +1,8 @@
 node_modules/
 .superpowers/
 dist/
+ext/node_modules/
+ext/.output/
+ext/.wxt/
+.output/
+.wxt/
