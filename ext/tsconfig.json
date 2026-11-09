@@ -1,4 +1,4 @@
 {
   "extends": "./.wxt/tsconfig.json",
-  "compilerOptions": { "strict": true, "jsx": "react-jsx", "jsxImportSource": "preact" }
+  "compilerOptions": { "strict": true, "types": ["chrome", "node"], "jsx": "react-jsx", "jsxImportSource": "preact" }
 }

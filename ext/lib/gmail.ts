@@ -54,7 +54,7 @@ export function createGmail(
       const body = await res.text();
       const limited = res.status === 429 || (res.status === 403 && body.includes("rateLimitExceeded"));
       if (limited && backoff < BACKOFF_MS.length) {
-        await sleep(BACKOFF_MS[backoff++]);
+        await sleep(BACKOFF_MS[backoff++]!);
         continue;
       }
       throw new Error(`Gmail ${res.status}: ${body.slice(0, 200)}`);

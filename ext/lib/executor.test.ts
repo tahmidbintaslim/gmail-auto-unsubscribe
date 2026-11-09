@@ -46,7 +46,7 @@ describe("unsubscribeOne", () => {
     const d = mk();
     await unsubscribeOne("a", { mailto: "mailto:u@a.co?subject=x%0D%0ABcc:%20v@b.co%0D%0A%0D%0Aevil" }, d);
     const raw = (d.sendRaw as any).mock.calls[0][0] as string;
-    const head = raw.split("\r\n\r\n")[0].split("\r\n");
+    const head = raw.split("\r\n\r\n")[0]!.split("\r\n");
     expect(head.filter((l) => /^bcc/i.test(l))).toHaveLength(0);
     expect(head.filter((l) => l.startsWith("Subject:"))).toHaveLength(1);
   });

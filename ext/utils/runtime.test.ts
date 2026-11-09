@@ -18,8 +18,8 @@ describe("appendLog", () => {
     await appendLog({ sender: "new", method: "website", at: 9999, ok: true });
     const log = store.log as { sender: string }[];
     expect(log).toHaveLength(5000);
-    expect(log[0].sender).toBe("s1");
-    expect(log[4999].sender).toBe("new");
+    expect(log[0]!.sender).toBe("s1");
+    expect(log[4999]!.sender).toBe("new");
   });
   it("starts a log when empty", async () => {
     await appendLog({ sender: "a", method: "none", at: 1, ok: false });

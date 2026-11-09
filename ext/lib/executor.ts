@@ -15,7 +15,7 @@ const ADDR = /^[^\s,;<>"()]+@[^\s,;<>"()]+$/;
 function buildMailto(mailto: string): string | null {
   try {
     const [rawAddr, query = ""] = mailto.replace(/^mailto:/i, "").split("?");
-    const addr = decodeURIComponent(rawAddr);
+    const addr = decodeURIComponent(rawAddr ?? "");
     if (!ADDR.test(addr)) return null;
     const q = new URLSearchParams(query.replace(/\+/g, "%2B"));
     const subject = (q.get("subject") ?? "unsubscribe").replace(/[\r\n]+/g, " ");

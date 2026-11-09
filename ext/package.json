@@ -11,6 +11,8 @@
     "preact": "11.2.0"
   },
   "devDependencies": {
+    "@types/chrome": "0.3.7",
+    "@types/node": "24.19.2",
     "typescript": "7.0.2",
     "wxt": "0.21.5"
   }

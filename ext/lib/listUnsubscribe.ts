@@ -5,7 +5,7 @@ export function parseListUnsubscribe(
   listUnsubscribePost: string | undefined,
 ): UnsubMethods {
   const out: UnsubMethods = {};
-  const entries = [...(listUnsubscribe ?? "").matchAll(/<([^>]*)>/g)].map((m) => m[1].trim());
+  const entries = [...(listUnsubscribe ?? "").matchAll(/<([^>]*)>/g)].map((m) => (m[1] ?? "").trim());
   const https = entries.find((e) => /^https:/i.test(e));
   const url = https ?? entries.find((e) => /^http:/i.test(e));
   const mailto = entries.find((e) => /^mailto:/i.test(e));

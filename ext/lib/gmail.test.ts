@@ -26,7 +26,7 @@ function fakeFetch(opts: { pages?: string[][]; msgs?: Record<string, any>; sent?
       const pages = opts.pages!;
       const i = Number(u.searchParams.get("pageToken") ?? 0);
       return json({
-        messages: pages[i].map((id) => ({ id })),
+        messages: pages[i]!.map((id) => ({ id })),
         ...(i + 1 < pages.length ? { nextPageToken: String(i + 1) } : {}),
       });
     }
@@ -58,9 +58,9 @@ describe("gmail client", () => {
         lastOpenedAt: 200, lastSeenAt: 300, replied: true, methods: { url: "https://x.co/u" },
       },
     ]);
-    expect(calls[0].url).toContain("maxResults=500");
-    expect(new URL(calls[0].url).searchParams.get("q")).toBe(SUBSCRIPTION_QUERY);
-    expect((calls[0].init?.headers as Record<string, string>).Authorization).toBe("Bearer tok");
+    expect(calls[0]!.url).toContain("maxResults=500");
+    expect(new URL(calls[0]!.url).searchParams.get("q")).toBe(SUBSCRIPTION_QUERY);
+    expect((calls[0]!.init?.headers as Record<string, string>).Authorization).toBe("Bearer tok");
     // only senders in the result get a sent lookup
     expect(calls.filter((c) => c.url.includes("in%3Asent")).length).toBe(1);
   });
@@ -84,7 +84,7 @@ describe("gmail client", () => {
     expect(out).toEqual([]);
     expect(tok).toHaveBeenCalledWith({ refresh: true });
     expect(tok).toHaveBeenCalledTimes(2);
-    expect(fn.mock.calls[1][1].headers.Authorization).toBe("Bearer new");
+    expect(fn.mock.calls[1]![1].headers.Authorization).toBe("Bearer new");
   });
 
   it("throws AuthError when 401 persists", async () => {
@@ -94,7 +94,7 @@ describe("gmail client", () => {
   });
 
   it("backs off 1s,2s on 429 then succeeds", async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn(async (_ms: number) => {});
     const fn = vi.fn()
       .mockResolvedValueOnce(json({}, 429))
       .mockResolvedValueOnce(json({}, 429))
@@ -104,7 +104,7 @@ describe("gmail client", () => {
   });
 
   it("retries 403 rateLimitExceeded and gives up after 1s,2s,4s", async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn(async (_ms: number) => {});
     const fn = vi.fn(async () => json({ error: { errors: [{ reason: "rateLimitExceeded" }] } }, 403));
     await expect(createGmail(getToken, fn as any, sleep).listSubscribedSenders(0)).rejects.toThrow();
     expect(sleep.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 4000]);
