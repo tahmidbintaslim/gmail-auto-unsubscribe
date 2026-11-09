@@ -83,7 +83,7 @@ export function App({ scan, run, stop }: AppProps) {
       return (
         <main>
           <p role="status">
-            {view.total == null ? "Scanning your last 90 days of mail…" : `Scanning… ${view.done} of ${view.total} messages`}
+            {view.total == null ? "Scanning your last 90 days of mail…" : `Scanning… ${view.done} of ${view.total}`}
           </p>
         </main>
       );

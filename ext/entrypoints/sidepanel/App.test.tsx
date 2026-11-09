@@ -111,7 +111,7 @@ describe("App", () => {
     await click(btn(/Connect Gmail/));
     expect(root.textContent).toContain("Scanning your last 90 days of mail…");
     await act(() => report(120, 900));
-    expect(root.textContent).toContain("Scanning… 120 of 900 messages");
+    expect(root.textContent).toContain("Scanning… 120 of 900");
   });
   it("warns how many tabs may open", async () => {
     const web = (name: string): Scored => ({ ...sender(name, true), methods: { url: `https://${name}.co/u` } });
