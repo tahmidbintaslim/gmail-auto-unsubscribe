@@ -87,7 +87,7 @@ describe("App", () => {
     await click(btn(/^Unsubscribe$/));
     expect(run.mock.calls[0]![0].map((s) => s.name)).toEqual(["Alpha", "Beta"]);
     const e = (sender: string): LogEntry => ({ sender, method: "one-click", at: 1, ok: true });
-    await act(() => { emit(e("a")); emit(e("b")); });
+    await act(() => { emit(e("a")); emit(e("b")); emit({ ...e("c"), method: "none", ok: false }); });
     expect(root.textContent).toContain("Swept: 2");
     await act(async () => { finish(); await Promise.resolve(); });
     expect(root.textContent).toContain("Done");
@@ -100,5 +100,56 @@ describe("App", () => {
   it("gives every checkbox the sender name as accessible name", async () => {
     await toReview();
     expect(boxes().map((b) => b.getAttribute("aria-label"))).toEqual(["Alpha", "Beta", "Gamma"]);
+  });
+  it("shows scan progress once it arrives", async () => {
+    let report!: (d: number, t: number) => void;
+    const scan = vi.fn((onProgress?: (d: number, t: number) => void) => {
+      report = onProgress!;
+      return new Promise<Scored[]>(() => {});
+    });
+    await mount({ scan, run: async () => {} });
+    await click(btn(/Connect Gmail/));
+    expect(root.textContent).toContain("Scanning your last 90 days of mail…");
+    await act(() => report(120, 900));
+    expect(root.textContent).toContain("Scanning… 120 of 900 messages");
+  });
+  it("warns how many tabs will open for website-only senders", async () => {
+    const web = (name: string): Scored => ({ ...sender(name, true), methods: { url: `https://${name}.co/u` } });
+    const run = vi.fn(async () => {});
+    await mount({ scan: async () => [web("W1"), web("W2"), sender("Alpha", true), { ...sender("M", true), methods: { mailto: "mailto:u@m.co", url: "https://m.co" } }], run });
+    await click(btn(/Connect Gmail/));
+    await click(btn(/Unsubscribe from/));
+    expect(root.textContent).toContain("2 of them only offer a website link, so 2 tabs will open for you to finish.");
+    await click(btn(/^Cancel$/));
+    await click(boxes()[1]!);
+    await click(btn(/Unsubscribe from/));
+    expect(root.textContent).toContain("1 of them only offer a website link, so 1 tab will open for you to finish.");
+    await click(btn(/^Cancel$/));
+    await click(boxes()[0]!);
+    await click(btn(/Unsubscribe from/));
+    expect(root.textContent).not.toContain("website link");
+  });
+  it("does not pre-check a sender swept before and badges it", async () => {
+    await mount({ scan: async () => [{ ...sender("Alpha", true), swept: true }, sender("Beta", true)], run: async () => {} });
+    await click(btn(/Connect Gmail/));
+    expect(boxes().map((b) => b.checked)).toEqual([false, true]);
+    const items = root.querySelectorAll("li");
+    expect(items[0]!.textContent).toContain("Swept before");
+    expect(items[1]!.textContent).not.toContain("Swept before");
+  });
+  it("says how many log entries could not be saved", async () => {
+    const run = vi.fn(async () => ({ logErrors: 3 }));
+    await toReview(run);
+    await click(btn(/Unsubscribe from/));
+    await click(btn(/^Unsubscribe$/));
+    expect(root.textContent).toContain("Done");
+    expect(root.textContent).toContain("3 log entries could not be saved.");
+  });
+  it("says nothing about the log when every entry was saved", async () => {
+    const run = vi.fn(async () => ({ logErrors: 0 }));
+    await toReview(run);
+    await click(btn(/Unsubscribe from/));
+    await click(btn(/^Unsubscribe$/));
+    expect(root.textContent).not.toContain("could not be saved");
   });
 });

@@ -1,29 +1,41 @@
 import { render } from "preact";
-import { App, BusyError } from "./App";
+import { App, BusyError, type Row } from "./App";
 import { AuthError } from "../../lib/gmail";
-import type { Scored } from "../../lib/score";
 import type { LogEntry } from "../../lib/executor";
 import "./style.css";
 
-async function scan(): Promise<Scored[]> {
-  const r = await chrome.runtime.sendMessage({ type: "scan" });
-  if (r && !Array.isArray(r) && r.error === "auth") throw new AuthError("auth");
-  if (!Array.isArray(r)) throw new Error("scan failed");
-  return r;
+type BgMsg =
+  | { type: "progress"; done: number; total: number }
+  | { type: "entry"; entry: LogEntry }
+  | { type: "scanned"; senders: Row[] }
+  | { type: "ran"; logErrors: number }
+  | { type: "error"; error: "auth" | "busy" | "other" };
+
+// One port per operation; resolves on the final message, rejects on error or a dropped worker.
+function call<T extends BgMsg["type"]>(msg: object, final: T, onMsg: (m: BgMsg) => void) {
+  return new Promise<Extract<BgMsg, { type: T }>>((resolve, reject) => {
+    const port = chrome.runtime.connect({ name: "sweep" });
+    port.onMessage.addListener((m: BgMsg) => {
+      if (m.type === final) { resolve(m as Extract<BgMsg, { type: T }>); port.disconnect(); }
+      else if (m.type === "error") {
+        reject(m.error === "auth" ? new AuthError("auth") : m.error === "busy" ? new BusyError() : new Error("failed"));
+        port.disconnect();
+      } else onMsg(m);
+    });
+    port.onDisconnect.addListener(() => reject(new Error("background disconnected")));
+    port.postMessage(msg);
+  });
 }
 
-async function run(items: Scored[], onEntry: (e: LogEntry) => void): Promise<void> {
-  const listener = (m: { type?: string; entry?: LogEntry }) => {
-    if (m?.type === "entry" && m.entry) onEntry(m.entry);
-  };
-  chrome.runtime.onMessage.addListener(listener);
-  try {
-    const r = await chrome.runtime.sendMessage({ type: "run", items: items.map((s) => ({ sender: s.email, methods: s.methods })) });
-    if (r?.error === "busy") throw new BusyError();
-    if (r?.error) throw r.error === "auth" ? new AuthError("auth") : new Error("run failed");
-  } finally {
-    chrome.runtime.onMessage.removeListener(listener);
-  }
+async function scan(onProgress?: (done: number, total: number) => void): Promise<Row[]> {
+  const r = await call({ type: "scan" }, "scanned", (m) => { if (m.type === "progress") onProgress?.(m.done, m.total); });
+  return r.senders;
+}
+
+async function run(items: Row[], onEntry: (e: LogEntry) => void) {
+  const r = await call({ type: "run", items: items.map((s) => ({ sender: s.email, methods: s.methods })) }, "ran",
+    (m) => { if (m.type === "entry") onEntry(m.entry); });
+  return { logErrors: r.logErrors };
 }
 
 render(<App scan={scan} run={run} />, document.getElementById("app")!);

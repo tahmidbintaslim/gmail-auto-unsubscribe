@@ -5,19 +5,22 @@ import { MAX_PER_RUN, type LogEntry } from "../../lib/executor";
 
 export class BusyError extends Error {}
 
+// swept: the background found an ok:true log entry for this sender from an earlier run
+export type Row = Scored & { swept?: boolean };
 export type AppProps = {
-  scan: () => Promise<Scored[]>;
-  run: (items: Scored[], onEntry: (e: LogEntry) => void) => Promise<void>;
+  scan: (onProgress?: (done: number, total: number) => void) => Promise<Row[]>;
+  run: (items: Row[], onEntry: (e: LogEntry) => void) => Promise<{ logErrors: number } | void>;
 };
 type View =
   | { s: "signed-out" }
-  | { s: "scanning" }
-  | { s: "review"; list: Scored[] }
-  | { s: "confirm"; list: Scored[] }
+  | { s: "scanning"; done?: number; total?: number }
+  | { s: "review"; list: Row[] }
+  | { s: "confirm"; list: Row[] }
   | { s: "running" }
-  | { s: "done" }
+  | { s: "done"; logErrors: number }
   | { s: "error"; auth: boolean; busy?: boolean };
 
+const websiteOnly = (m: Scored["methods"]) => !m.oneClickUrl && !m.mailto && !!m.url;
 const method = (m: Scored["methods"]) => (m.oneClickUrl ? "One-click" : m.mailto ? "Email" : m.url ? "Website" : "None");
 
 export function App({ scan, run }: AppProps) {
@@ -28,8 +31,9 @@ export function App({ scan, run }: AppProps) {
   async function doScan() {
     setView({ s: "scanning" });
     try {
-      const list = await scan();
-      setChecked(new Set(list.filter((x) => x.recommend).map((x) => x.email)));
+      const list = await scan((done, total) =>
+        setView((v) => (v.s === "scanning" ? { s: "scanning", done, total } : v)));
+      setChecked(new Set(list.filter((x) => x.recommend && !x.swept).map((x) => x.email)));
       setView({ s: "review", list });
     } catch (e) {
       setView({ s: "error", auth: e instanceof AuthError });
@@ -39,13 +43,14 @@ export function App({ scan, run }: AppProps) {
   const confirmRef = useRef<HTMLDivElement>(null);
   useEffect(() => { if (view.s === "confirm") confirmRef.current?.focus(); }, [view.s]);
 
-  async function doRun(list: Scored[]) {
-    const picked = list.filter((x) => checked.has(x.email)).slice(0, MAX_PER_RUN);
+  const pick = (list: Row[]) => list.filter((x) => checked.has(x.email)).slice(0, MAX_PER_RUN);
+
+  async function doRun(list: Row[]) {
     setSwept(0);
     setView({ s: "running" });
     try {
-      await run(picked, () => setSwept((c) => c + 1));
-      setView({ s: "done" });
+      const r = await run(pick(list), (e) => { if (e.ok) setSwept((c) => c + 1); });
+      setView({ s: "done", logErrors: r?.logErrors ?? 0 });
     } catch (e) {
       setView({ s: "error", auth: e instanceof AuthError, busy: e instanceof BusyError });
     }
@@ -68,7 +73,13 @@ export function App({ scan, run }: AppProps) {
         </main>
       );
     case "scanning":
-      return <main><p role="status">Scanning your last 90 days of mail…</p></main>;
+      return (
+        <main>
+          <p role="status">
+            {view.total == null ? "Scanning your last 90 days of mail…" : `Scanning… ${view.done} of ${view.total} messages`}
+          </p>
+        </main>
+      );
     case "review": {
       const n = Math.min(checked.size, MAX_PER_RUN);
       return (
@@ -80,6 +91,7 @@ export function App({ scan, run }: AppProps) {
                 <label>
                   <input type="checkbox" aria-label={x.name} checked={checked.has(x.email)} onChange={() => toggle(x.email)} />
                   <span class="who"><strong>{x.name}</strong> <span class="muted">{x.domain}</span></span>
+                  {x.swept && <span class="badge">Swept before</span>}
                   <span class="badge">{method(x.methods)}</span>
                 </label>
                 <div class="muted">{x.reasons.join(" · ")}</div>
@@ -99,9 +111,11 @@ export function App({ scan, run }: AppProps) {
       const text = total > n
         ? `Unsubscribe from the first ${n} of ${total} senders? This can't be undone.`
         : `Unsubscribe from ${n} sender${s}? This can't be undone.`;
+      const k = pick(view.list).filter((x) => websiteOnly(x.methods)).length;
       return (
         <div data-confirm ref={confirmRef} tabIndex={-1} role="alertdialog" aria-label="Confirm unsubscribe" style="padding:14px">
           <p>{text}</p>
+          {k > 0 && <p>{k} of them only offer a website link, so {k === 1 ? "1 tab will" : `${k} tabs will`} open for you to finish.</p>}
           <button class="primary" onClick={() => doRun(view.list)}>Unsubscribe</button>
           <button onClick={() => setView({ s: "review", list: view.list })}>Cancel</button>
         </div>
@@ -110,7 +124,12 @@ export function App({ scan, run }: AppProps) {
     case "running":
       return <main><p role="status">Swept: {swept}</p></main>;
     case "done":
-      return <main><p role="status">Done. Swept: {swept}</p></main>;
+      return (
+        <main>
+          <p role="status">Done. Swept: {swept}</p>
+          {view.logErrors > 0 && <p role="alert">{view.logErrors} log entries could not be saved.</p>}
+        </main>
+      );
     case "error":
       return (
         <main>

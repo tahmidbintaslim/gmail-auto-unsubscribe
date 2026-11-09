@@ -3,6 +3,8 @@ import { defineConfig } from "wxt";
 export default defineConfig({
   vite: () => ({ oxc: { jsx: { runtime: "automatic", importSource: "preact" } } }),
   manifest: {
+    // pins the extension ID, which the Chrome Extension OAuth client is bound to (see README)
+    ...(process.env.WXT_EXTENSION_KEY ? { key: process.env.WXT_EXTENSION_KEY } : {}),
     name: "UnsubSweep",
     version: "2.0.0",
     permissions: ["identity", "storage", "sidePanel"],

@@ -52,12 +52,13 @@ export function createGmail(
         continue;
       }
       const body = await res.text();
-      const limited = res.status === 429 || (res.status === 403 && body.includes("rateLimitExceeded"));
-      if (limited && backoff < BACKOFF_MS.length) {
+      const transient =
+        res.status === 429 || res.status >= 500 || (res.status === 403 && body.includes("rateLimitExceeded"));
+      if (transient && backoff < BACKOFF_MS.length) {
         await sleep(BACKOFF_MS[backoff++]!);
         continue;
       }
-      throw new Error(`Gmail ${res.status}: ${body.slice(0, 200)}`);
+      throw Object.assign(new Error(`Gmail ${res.status}: ${body.slice(0, 200)}`), { status: res.status });
     }
   }
 
@@ -91,7 +92,11 @@ export function createGmail(
         const id = ids[next++];
         const p = new URLSearchParams({ format: "metadata" });
         for (const h of ["From", "List-Unsubscribe", "List-Unsubscribe-Post"]) p.append("metadataHeaders", h);
-        metas.push(await api(`/messages/${id}?${p}`));
+        try {
+          metas.push(await api(`/messages/${id}?${p}`));
+        } catch (e) {
+          if ((e as { status?: number }).status !== 404) throw e; // deleted since the list call: skip it
+        }
         onProgress?.(++done, ids.length);
         }
       } catch (e) {

@@ -18,3 +18,8 @@ export async function appendLog(entry: LogEntry): Promise<void> {
   const next = [...((log as LogEntry[] | undefined) ?? []), entry].slice(-LOG_CAP);
   await chrome.storage.local.set({ log: next });
 }
+
+export async function sweptSenders(): Promise<Set<string>> {
+  const { log } = await chrome.storage.local.get("log");
+  return new Set(((log as LogEntry[] | undefined) ?? []).filter((e) => e.ok).map((e) => e.sender.toLowerCase()));
+}

@@ -111,6 +111,33 @@ describe("gmail client", () => {
     expect(fn).toHaveBeenCalledTimes(4);
   });
 
+  it("retries 5xx: 500, 500, then 200 succeeds after 2 retries", async () => {
+    const sleep = vi.fn(async (_ms: number) => {});
+    const fn = vi.fn()
+      .mockResolvedValueOnce(json({}, 500))
+      .mockResolvedValueOnce(json({}, 500))
+      .mockResolvedValueOnce(json({}));
+    await expect(createGmail(getToken, fn as any, sleep).listSubscribedSenders(0)).resolves.toEqual([]);
+    expect(sleep.mock.calls.map((c) => c[0])).toEqual([1000, 2000]);
+  });
+
+  it("gives up after 503 four times", async () => {
+    const fn = vi.fn(async () => json({}, 503));
+    await expect(createGmail(getToken, fn as any, noSleep).listSubscribedSenders(0)).rejects.toThrow(/503/);
+    expect(fn).toHaveBeenCalledTimes(4);
+  });
+
+  it("skips a message deleted between list and get (404)", async () => {
+    const msgs = { a: msg("a", "a@x.com", 1, true), b: msg("b", "b@x.com", 2, true) };
+    const { fn: base } = fakeFetch({ pages: [["a", "gone", "b"]], msgs });
+    const fn = (async (url: string, init?: RequestInit) =>
+      new URL(url).pathname.endsWith("/gone") ? json({ error: { code: 404 } }, 404) : base(url, init)) as unknown as typeof fetch;
+    const progress: number[][] = [];
+    const out = await createGmail(getToken, fn, noSleep).listSubscribedSenders(0, (d, t) => progress.push([d, t]));
+    expect(out.map((s) => s.email).sort()).toEqual(["a@x.com", "b@x.com"]);
+    expect(progress.at(-1)).toEqual([3, 3]);
+  });
+
   it("does not retry a plain 403", async () => {
     const fn = vi.fn(async () => json({ error: { message: "nope" } }, 403));
     await expect(createGmail(getToken, fn as any, noSleep).listSubscribedSenders(0)).rejects.toThrow();
