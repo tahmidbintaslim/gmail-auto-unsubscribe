@@ -1,46 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <style>
+    /* UnsubSweep tokens. Dark values follow the OS theme. */
+    :root {
+      --bg: #FFFBF7;
+      --fg: #1C1917;
+      --muted: #57534E;
+      --accent: #C2410C;
+      --accent-fg: #FFFFFF;
+      --surface: #F5EFE6;
+      --focus: #C2410C;
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1C1917;
+        --fg: #FAF7F2;
+        --muted: #A8A29E;
+        --accent: #FB923C;
+        --accent-fg: #1C1917;
+        --surface: #292524;
+        --focus: #FB923C;
+      }
+    }
     body {
-      width: 230px;
+      width: 240px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       padding: 14px;
       margin: 0;
-      color: #202124;
+      color: var(--fg);
+      background: var(--bg);
     }
-    h3 {
-      margin: 0 0 10px;
-      font-size: 15px;
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    h1 img {
+      width: 20px;
+      height: 20px;
     }
     button {
       width: 100%;
       padding: 9px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      font: inherit;
       font-weight: 600;
       font-size: 13px;
       cursor: pointer;
       margin-bottom: 8px;
     }
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
     #startBtn {
-      background: #1a73e8;
-      color: #fff;
+      background: var(--accent);
+      color: var(--accent-fg);
     }
     #startBtn:hover {
-      background: #1557b0;
+      filter: brightness(1.08);
     }
     #stopBtn {
-      background: #f1f3f4;
-      color: #3c4043;
+      background: var(--surface);
+      color: var(--fg);
     }
     #stopBtn:hover {
-      background: #e8eaed;
+      filter: brightness(0.96);
     }
     #status {
       font-size: 12px;
-      color: #5f6368;
+      color: var(--muted);
       text-align: center;
       margin-top: 6px;
     }
@@ -49,21 +87,22 @@
       align-items: flex-start;
       gap: 8px;
       font-size: 12px;
-      color: #3c4043;
-      margin: 2px 0 8px;
+      color: var(--muted);
+      margin: 2px 0 10px;
     }
     .option input {
       margin: 1px 0 0;
+      accent-color: var(--accent);
     }
   </style>
 </head>
 <body>
-  <h3>Gmail Auto Unsubscribe</h3>
+  <h1><img src="icons/icon48.png" alt=""> UnsubSweep</h1>
   <label class="option">
     <input id="allowWebsites" type="checkbox">
     When a sender has no one-click unsubscribe, open its "Go to website" link (up to 5 per run)
   </label>
-  <button id="startBtn">Start Unsubscribing</button>
+  <button id="startBtn">Start sweep</button>
   <button id="stopBtn">Stop</button>
   <div id="status" role="status" aria-live="polite">Ready</div>
 

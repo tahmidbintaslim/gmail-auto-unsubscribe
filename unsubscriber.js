@@ -315,7 +315,7 @@
       case "running":
         return `Running: ${counts}.`;
       case "done":
-        return `Done: ${counts}.`;
+        return `Swept: ${counts}.`;
       case "limit":
         return `Paused after ${LIMITS.maxRows} senders: ${counts}. Press Start to continue.`;
       case "left-page":
