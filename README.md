@@ -1,11 +1,11 @@
-# Gmail Auto Unsubscribe
+# UnsubSweep
 
 [![CI](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A Chrome extension (Manifest V3) that works through Gmail's Manage subscriptions page for you: it clicks Unsubscribe for each sender and confirms Gmail's dialog. It uses no Gmail API, no OAuth and no server; it clicks in the Gmail tab you already have open.
+**UnsubSweep** is a Chrome extension (Manifest V3) that works through Gmail's Manage subscriptions page for you: it clicks Unsubscribe for each sender and confirms Gmail's dialog. It uses no Gmail API, no OAuth and no server; it clicks in the Gmail tab you already have open.
 
-**Status: prototype.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. It has no Chrome Web Store listing; you install it with Load unpacked.
+**Status: preparing v1 for the Chrome Web Store.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. Until the listing is live, install it with Load unpacked. Website and privacy policy: [`site/`](site/) (served at `/` and `/privacy`).
 
 ![The extension's popup showing "Running: 1 unsubscribed, 1 skipped." next to a stand-in subscriptions list with an "Unsubscribe from Example Club?" dialog open](docs/images/demo-running.png)
 
@@ -123,7 +123,7 @@ There is no build step: Chrome loads the source files as they are. You do not ne
 ## Use
 
 1. Open Gmail in Chrome and go to **Manage subscriptions** in the left menu (Gmail may list it under **More**). If your account does not show that page, the extension has nothing to work on.
-2. Click the extension icon, then **Start Unsubscribing**.
+2. Click the UnsubSweep icon, then **Start sweep**.
 3. Leave the Gmail tab alone while it runs. Press **Stop** at any time.
 
 The extension matches Gmail's English labels (Unsubscribe, Cancel, Go to website). With Gmail set to another language it finds nothing to click.
@@ -139,7 +139,7 @@ npm run demo        # serves the repo on http://localhost:8000 (PORT=... to chan
 # or: python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000/demo/> and press **Start Unsubscribing**. **Reset** reloads the list.
+Then open <http://localhost:8000/demo/> and press **Start sweep**. **Reset** reloads the list.
 
 ![The same demo after the run: the popup shows "Done: 4 unsubscribed, 1 skipped." and only Example Travel, the website-only sender, is left in the list](docs/images/demo-done.png)
 
@@ -186,11 +186,16 @@ test/                 Vitest + jsdom tests; fixtures/ holds the stand-in Gmail m
 demo/                 Browser demo of the real files against the fixtures (not shipped)
 scripts/serve-demo.mjs  Dependency-free local server for the demo (npm run demo)
 docs/images/          README screenshots, captured from demo/
+icons/, brand/        Toolbar and store icons; brand/mark.svg is the source (npm run icons)
+site/                 Landing page and privacy policy (not shipped in the extension)
+scripts/package.mjs   Builds the Chrome Web Store zip (npm run package)
 ```
 
 ## Deployment
 
-Not published. The extension is installed with Load unpacked from a clone of `main`; there is no Chrome Web Store listing, release package or hosted service. Before any listing, the name would need checking against Google's branding rules for the word "Gmail".
+- **Extension:** `npm run package` writes `dist/unsubsweep-<version>.zip` with only the shipped files. Upload it with the copy in [`docs/store-listing.md`](docs/store-listing.md). The name uses "for Gmail" only, per Google's branding rules.
+- **Website:** Vercel serves the repository as static files: `/` is [`site/index.html`](site/index.html), `/privacy` is [`site/privacy.html`](site/privacy.html), and `/demo/` is the demo.
+- **Launch posts:** [`docs/launch.md`](docs/launch.md).
 
 ## Manual test on real Gmail
 
