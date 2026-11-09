@@ -128,4 +128,33 @@ describe("gmail client", () => {
     expect(raw).not.toMatch(/[+/=]/);
     expect(Buffer.from(raw, "base64url").toString("utf8")).toBe(rfc);
   });
+  it("stops the metadata fan-out after the first failure", async () => {
+    const ids = Array.from({ length: 50 }, (_, i) => `m${i}`);
+    let gets = 0;
+    const fn = (async (url: string) => {
+      const u = new URL(url);
+      if (u.pathname.endsWith("/messages")) return json({ messages: ids.map((id) => ({ id })) });
+      gets++;
+      if (u.pathname.endsWith("/m0")) return json({}, 401);
+      await new Promise((r) => setTimeout(r, 1));
+      return json(msg("x", "a@x.com", 1, true));
+    }) as unknown as typeof fetch;
+    await expect(createGmail(getToken, fn, noSleep).listSubscribedSenders(0)).rejects.toBeInstanceOf(AuthError);
+    await new Promise((r) => setTimeout(r, 20)); // let any runaway workers show up
+    expect(gets).toBeLessThanOrEqual(20);
+  });
+
+  it("wraps getToken rejections in AuthError", async () => {
+    const boom = new Error("revoked");
+    const tok = vi.fn(async (o: { refresh: boolean }) => {
+      if (o.refresh) throw boom;
+      return "old";
+    });
+    const fn = vi.fn(async () => json({}, 401));
+    const err = await createGmail(tok, fn as any, noSleep).listSubscribedSenders(0).catch((e) => e);
+    expect(err).toBeInstanceOf(AuthError);
+    expect(err.cause).toBe(boom);
+    const err2 = await createGmail(async () => { throw boom; }, fn as any, noSleep).sendRaw("x").catch((e) => e);
+    expect(err2).toBeInstanceOf(AuthError);
+  });
 });

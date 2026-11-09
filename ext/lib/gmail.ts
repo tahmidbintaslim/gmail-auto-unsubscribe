@@ -27,12 +27,19 @@ export function createGmail(
   sleep: (ms: number) => Promise<void> = realSleep,
 ) {
   let token: string | undefined;
+  const tok = async (refresh: boolean) => {
+    try {
+      return await getToken({ refresh });
+    } catch (e) {
+      throw new AuthError("Could not obtain a Gmail token", { cause: e });
+    }
+  };
 
   async function api(path: string, init: RequestInit = {}): Promise<any> {
     let refreshed = false;
     let backoff = 0;
     for (;;) {
-      token ??= await getToken({ refresh: false });
+      token ??= await tok(false);
       const res = await fetchFn(BASE + path, {
         ...init,
         headers: { ...(init.headers as Record<string, string>), Authorization: `Bearer ${token}` },
@@ -41,7 +48,7 @@ export function createGmail(
       if (res.status === 401) {
         if (refreshed) throw new AuthError("Gmail rejected the refreshed token");
         refreshed = true;
-        token = await getToken({ refresh: true });
+        token = await tok(true);
         continue;
       }
       const body = await res.text();
@@ -79,12 +86,17 @@ export function createGmail(
     let next = 0;
     let done = 0;
     const worker = async () => {
-      while (next < ids.length) {
+      try {
+        while (next < ids.length) {
         const id = ids[next++];
         const p = new URLSearchParams({ format: "metadata" });
         for (const h of ["From", "List-Unsubscribe", "List-Unsubscribe-Post"]) p.append("metadataHeaders", h);
         metas.push(await api(`/messages/${id}?${p}`));
         onProgress?.(++done, ids.length);
+        }
+      } catch (e) {
+        next = ids.length; // stop sibling workers on first failure
+        throw e;
       }
     };
     await Promise.all(Array.from({ length: Math.min(CONCURRENCY, ids.length) }, worker));
