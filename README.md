@@ -7,7 +7,7 @@
 
 **Status: preparing v1 for the Chrome Web Store.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. Until the listing is live, install it with Load unpacked. Website and privacy policy: [`site/`](site/) (served at `/` and `/privacy`).
 
-![The extension's popup showing "Running: 1 unsubscribed, 1 skipped." next to a stand-in subscriptions list with an "Unsubscribe from Example Club?" dialog open](docs/images/demo-running.png)
+![The UnsubSweep popup showing "Running: 1 unsubscribed, 0 skipped." next to a stand-in subscriptions list with four senders left](docs/images/demo-running.png)
 
 *The extension's own popup and loop, running in [`demo/`](demo/) against the hand-written test fixture. This is not real Gmail.*
 
@@ -141,11 +141,11 @@ npm run demo        # serves the repo on http://localhost:8000 (PORT=... to chan
 
 Then open <http://localhost:8000/demo/> and press **Start sweep**. **Reset** reloads the list.
 
-![The same demo after the run: the popup shows "Done: 4 unsubscribed, 1 skipped." and only Example Travel, the website-only sender, is left in the list](docs/images/demo-done.png)
+![The same demo after the run: the popup shows "Swept: 4 unsubscribed, 1 skipped." and only Example Travel, the website-only sender, is left in the list](docs/images/demo-done.png)
 
 A full run, recorded with Playwright from `npm run demo` (15 seconds):
 
-![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Done: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
+![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Swept: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
 
 Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (the same page, served by Vercel from `vercel.json`, with `/` going to `/demo/`). It is the stand-in demo, not Gmail.
 
