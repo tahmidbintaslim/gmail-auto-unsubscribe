@@ -15,7 +15,8 @@
   "scripts": {
     "test": "vitest run",
     "demo": "node scripts/serve-demo.mjs",
-    "icons": "node scripts/build-icons.mjs"
+    "icons": "node scripts/build-icons.mjs",
+    "package": "node scripts/package.mjs"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
