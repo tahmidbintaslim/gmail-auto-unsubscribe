@@ -16,7 +16,7 @@ Post only after the store listing is live and the real-Gmail checklist in the RE
 >
 > Most tools that do this in bulk want OAuth read access to your whole inbox, and at least one well-known service sold data derived from it.
 >
-> UnsubSweep is an open-source Manifest V3 extension that does the clicking for you in the Gmail tab you already have open. It asks for two permissions (activeTab, scripting), makes no network requests, stores nothing, and only runs after you press Start on that page. It works one sender at a time, from the bottom of the list up, and stops if you leave the page.
+> UnsubSweep is an open-source Manifest V3 extension that does the clicking for you in the Gmail tab you already have open. It asks for two permissions (activeTab, scripting), makes no network requests of its own, stores nothing, and only runs after you press Start on that page. It works one sender at a time, from the bottom of the list up, and stops if you leave the page.
 >
 > Source: https://github.com/tahmidbintaslim/gmail-auto-unsubscribe · Store: <store-url>
 >

@@ -26,7 +26,23 @@ describe("privacy policy", () => {
   });
 });
 
+describe("network claims", () => {
+  // The opt-in Go to website option opens the sender's page, so "no network
+  // requests" must be scoped to the extension's own requests and say so.
+  it.each(["site/privacy.html", "docs/store-listing.md"])("%s scopes the claim and discloses Go to website", (file) => {
+    const text = read(file);
+    expect(text).toMatch(/no network requests of its own/i);
+    expect(text).toMatch(/Go to website[^.]*opens the sender's (?:own )?(?:page|site|website)/i);
+    expect(text).not.toMatch(/shares nothing with anyone/i);
+  });
+});
+
 describe("landing page", () => {
+  it("shows a still image instead of the GIF when reduced motion is preferred", () => {
+    const source = doc("site/index.html").querySelector('picture source[media="(prefers-reduced-motion: reduce)"]');
+    expect(source?.getAttribute("srcset")).toBe("/docs/images/demo-done.png");
+  });
+
   it("links to the privacy policy and the demo", () => {
     const hrefs = [...doc("site/index.html").querySelectorAll("a")].map((a) => a.getAttribute("href"));
     expect(hrefs).toContain("/privacy");

@@ -24,8 +24,12 @@
           <div class="actions"><a class="button" href="#">Add to Chrome, it's free</a><a class="button ghost" href="/demo/">Try the demo</a></div>
           <p class="note">Open source. Two permissions. Nothing to sign in to.</p>
         </div>
-        <img class="shot" src="/docs/images/demo-run.gif" width="960" height="600"
-             alt="UnsubSweep's popup counting senders as it unsubscribes from each one on a stand-in subscriptions page">
+        <picture>
+          <!-- WCAG 2.2.2: no looping animation for people who ask for reduced motion. -->
+          <source media="(prefers-reduced-motion: reduce)" srcset="/docs/images/demo-done.png">
+          <img class="shot" src="/docs/images/demo-run.gif" width="760" height="478"
+               alt="UnsubSweep's popup counting senders as it unsubscribes from each one on a stand-in subscriptions page">
+        </picture>
       </section>
 
       <section class="zeros" aria-label="Why it is private">

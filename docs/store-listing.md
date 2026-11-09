@@ -41,7 +41,7 @@ WHAT IT DOES
 PRIVACY
 • Two permissions: activeTab and scripting. No access to any site until you open the popup on Gmail and press Start.
 • Never opens, reads, moves or deletes your email.
-• No network requests, no storage, no analytics. The source is open: github.com/tahmidbintaslim/gmail-auto-unsubscribe
+• No network requests of its own, no storage, no analytics. The optional Go to website setting opens the sender's own page in a new tab, as Gmail's button does. The source is open: github.com/tahmidbintaslim/gmail-auto-unsubscribe
 
 There is no undo: a run unsubscribes from every sender on the page. Works with Gmail's English interface.
 
