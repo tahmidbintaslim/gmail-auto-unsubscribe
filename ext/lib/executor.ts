@@ -9,10 +9,23 @@ export type ExecDeps = {
 };
 export const MAX_PER_RUN = 250;
 
-function buildMailto(mailto: string): string {
-  const [addr, query = ""] = mailto.replace(/^mailto:/i, "").split("?");
-  const q = new URLSearchParams(query.replace(/\+/g, "%2B"));
-  return [`To: ${decodeURIComponent(addr)}`, `Subject: ${q.get("subject") ?? "unsubscribe"}`, "", q.get("body") ?? "unsubscribe"].join("\r\n");
+const ADDR = /^[^\s,;<>"()]+@[^\s,;<>"()]+$/;
+
+// Returns null when the sender-controlled mailto is unsafe (header injection, multiple recipients).
+function buildMailto(mailto: string): string | null {
+  try {
+    const [rawAddr, query = ""] = mailto.replace(/^mailto:/i, "").split("?");
+    const addr = decodeURIComponent(rawAddr);
+    if (!ADDR.test(addr)) return null;
+    const q = new URLSearchParams(query.replace(/\+/g, "%2B"));
+    const subject = (q.get("subject") ?? "unsubscribe").replace(/[\r\n]+/g, " ");
+    // eslint-disable-next-line no-control-regex
+    const encSubject = /^[\x20-\x7e]*$/.test(subject) ? subject : `=?UTF-8?B?${btoa(String.fromCharCode(...new TextEncoder().encode(subject)))}?=`;
+    const body = (q.get("body") ?? "unsubscribe").replace(/\r\n|\r|\n/g, "\r\n");
+    return [`To: ${addr}`, `Subject: ${encSubject}`, "MIME-Version: 1.0", "Content-Type: text/plain; charset=UTF-8", "", body].join("\r\n");
+  } catch {
+    return null;
+  }
 }
 
 export async function unsubscribeOne(sender: string, m: UnsubMethods, deps: ExecDeps): Promise<LogEntry> {
@@ -20,8 +33,9 @@ export async function unsubscribeOne(sender: string, m: UnsubMethods, deps: Exec
   if (m.oneClickUrl) {
     try { await deps.post(m.oneClickUrl); return done("one-click", true); } catch { /* fall through */ }
   }
-  if (m.mailto) {
-    try { await deps.sendRaw(buildMailto(m.mailto)); return done("mailto", true); } catch { /* fall through */ }
+  const raw = m.mailto ? buildMailto(m.mailto) : null;
+  if (raw) {
+    try { await deps.sendRaw(raw); return done("mailto", true); } catch { /* fall through */ }
   }
   if (m.url) {
     try { await deps.openTab(m.url); return done("website", true); } catch { /* fall through */ }
