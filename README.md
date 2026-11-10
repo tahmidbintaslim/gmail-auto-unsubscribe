@@ -1,7 +1,13 @@
 # UnsubSweep
 
-[![CI](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+**Press Start once and it clicks Unsubscribe for each sender on Gmail's Manage subscriptions page, up to 250 per run. No Gmail API, no OAuth, no server.**
+
+[![CI](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/github/license/tahmidbintaslim/gmail-auto-unsubscribe)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/tahmidbintaslim/gmail-auto-unsubscribe/main)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/commits/main)
+[![Demo](https://img.shields.io/badge/demo-stand--in%20page-0b5fff)](https://gmail-auto-unsubscribe-demo.vercel.app)
+[![GitHub stars](https://img.shields.io/github/stars/tahmidbintaslim/gmail-auto-unsubscribe?style=flat)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/stargazers)
 
 **UnsubSweep** is a Chrome extension (Manifest V3) that works through Gmail's Manage subscriptions page for you: it clicks Unsubscribe for each sender and confirms Gmail's dialog. It uses no Gmail API, no OAuth and no server; it clicks in the Gmail tab you already have open.
 
@@ -12,6 +18,41 @@
 *The extension's own popup and loop, running in [`demo/`](demo/) against the hand-written test fixture. This is not real Gmail.*
 
 > **There is no undo and no selection yet.** A run goes through every sender on the page, and the extension cannot re-subscribe you. Only press Start when you want to leave every list shown.
+
+## Quick start
+
+```bash
+git clone https://github.com/tahmidbintaslim/gmail-auto-unsubscribe.git
+```
+
+1. Open `chrome://extensions`, turn on **Developer mode** and click **Load unpacked**. Select the cloned folder.
+2. In Gmail, open **Manage subscriptions** (left menu, maybe under **More**).
+3. Click the extension icon, then **Start Unsubscribing**. Press **Stop** at any time.
+
+No `npm install` is needed to use it. To watch it run without Gmail, open the [hosted demo](https://gmail-auto-unsubscribe-demo.vercel.app) or run `npm run demo`.
+
+## Contents
+
+- [Features](#features)
+- [How it works](#how-it-works)
+- [What it clicks](#what-it-clicks)
+- [When a run stops](#when-a-run-stops)
+- [What it never does](#what-it-never-does)
+- [Privacy and account access](#privacy-and-account-access)
+- [Permissions](#permissions)
+- [Install (Load unpacked)](#install-load-unpacked)
+- [Use](#use)
+- [Try the demo (no Gmail needed)](#try-the-demo-no-gmail-needed)
+- [Tech stack](#tech-stack)
+- [Development](#development)
+- [Project structure](#project-structure)
+- [Deployment](#deployment)
+- [Manual test on real Gmail](#manual-test-on-real-gmail)
+- [Status and roadmap](#status-and-roadmap)
+- [Known limitations](#known-limitations)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
 ## Features
 
@@ -156,7 +197,7 @@ The demo is a way to watch the loop, not evidence that it works on real Gmail: i
 - Chrome extension, Manifest V3, plain JavaScript. The shipped files are classic scripts with no runtime dependencies and no bundler, because `chrome.scripting` cannot inject modules.
 - Chrome APIs: `chrome.scripting.executeScript`, `chrome.tabs.query` and `chrome.tabs.sendMessage`, `chrome.runtime` messaging.
 - Tests: [Vitest](https://vitest.dev/) 5 with [jsdom](https://github.com/jsdom/jsdom) 29.
-- CI: GitHub Actions on Node 22 and 24. Dependabot opens grouped weekly updates for npm and GitHub Actions.
+- CI: GitHub Actions on Node 22 and 24, plus CodeQL analysis. Dependabot opens grouped weekly updates for npm and GitHub Actions.
 
 ## Development
 
@@ -221,8 +262,10 @@ Prototype. The loop, its limits and the popup are covered by tests against stand
 
 Next: run the [manual checklist](#manual-test-on-real-gmail) on a real account and replace the hand-written fixtures with an anonymized capture of the real page. Not started: a preview or keep-list so a run can skip senders, and labels for Gmail languages other than English.
 
-## Limitations
+## Known limitations
 
+- Not yet tested on a live Gmail account: the tests and the demo use a hand-written stand-in for Gmail's page.
+- No undo. The extension cannot re-subscribe you.
 - English Gmail interface only.
 - It depends on Gmail's page markup, which Google can change at any time.
 - No preview, selection or keep-list: every sender on the page is processed.
@@ -230,7 +273,11 @@ Next: run the [manual checklist](#manual-test-on-real-gmail) on a real account a
 
 ## Contributing
 
-Issues and pull requests are welcome. Please keep the extension's surface as it is: no new permissions, network calls or storage without a clear reason in the pull request. Run `npm test` before opening one, and if you change what the loop clicks, add a test with a fixture and update this README.
+Issues and pull requests are welcome. Please keep the extension's surface as it is: no new permissions, network calls or storage without a clear reason in the pull request. Run `npm test` before opening one, and if you change what the loop clicks, add a test with a fixture and update this README. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist.
+
+## Security
+
+Please report vulnerabilities privately, not in a public issue. See [SECURITY.md](SECURITY.md).
 
 ## License
 
