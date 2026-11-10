@@ -79,7 +79,16 @@ describe("popup.js", () => {
     onMessage({ type: "PROGRESS", state: { ...running, phase: "done", unsubscribed: 2 } }, { tab: { id: 8 } });
     expect(status()).toBe("Ready");
     onMessage({ type: "PROGRESS", state: { ...running, phase: "done", unsubscribed: 2 } }, { tab: { id: 7 } });
-    expect(status()).toBe("Done: 2 unsubscribed, 0 skipped.");
+    expect(status()).toBe("Swept: 2 unsubscribed, 0 skipped.");
+  });
+
+  it("disables Start while a run is going and re-enables it after", async () => {
+    await vi.waitFor(() => expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(7, { action: "STATUS" }));
+    const start = win.document.getElementById("startBtn");
+    onMessage({ type: "PROGRESS", state: { ...running } }, { tab: { id: 7 } });
+    expect(start.disabled).toBe(true);
+    onMessage({ type: "PROGRESS", state: { ...running, phase: "done" } }, { tab: { id: 7 } });
+    expect(start.disabled).toBe(false);
   });
 
   it("stops the run on Stop", async () => {
@@ -94,5 +103,38 @@ describe("popup.js on reopen", () => {
     replies.STATUS = { state: { ...running, unsubscribed: 6, skipped: 2 } };
     openPopup();
     await vi.waitFor(() => expect(status()).toBe("Running: 6 unsubscribed, 2 skipped."));
+  });
+});
+
+describe("brand", () => {
+  it("popup is branded", () => {
+    const doc = win.document;
+    expect(doc.querySelector("h1").textContent.trim()).toBe("UnsubSweep");
+    expect(doc.getElementById("startBtn").textContent.trim()).toBe("Start sweep");
+  });
+
+  // WCAG 2.x relative luminance and contrast ratio.
+  const luminance = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => {
+      const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a, b) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  const tokens = (css) => Object.fromEntries([...css.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
+
+  it.each(["light", "dark"])("%s tokens meet 4.5:1 contrast", (theme) => {
+    const css = html.slice(html.indexOf("<style>"), html.indexOf("</style>"));
+    const darkAt = css.indexOf("prefers-color-scheme: dark");
+    expect(darkAt).toBeGreaterThan(-1);
+    const t = tokens(theme === "light" ? css.slice(0, darkAt) : css.slice(darkAt));
+    for (const [fg, bg] of [["fg", "bg"], ["muted", "bg"], ["accent-fg", "accent"], ["fg", "surface"]]) {
+      expect(t[fg] && t[bg], `${theme} ${fg}/${bg} defined`).toBeTruthy();
+      expect(contrast(t[fg], t[bg]), `${theme} ${fg}/${bg}`).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });

@@ -29,5 +29,16 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            ext/package-lock.json
       - run: npm ci
+      # v2 extension deps (ext/); its postinstall runs `wxt prepare`.
+      - run: npm ci --prefix ext
       - run: npm test
+      - run: npx tsc --noEmit
+        working-directory: ext
+      - run: npx wxt build
+        working-directory: ext
+      - run: npm run package
+      - run: unzip -l dist/unsubsweep-*.zip

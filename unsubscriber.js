@@ -280,7 +280,7 @@
         }
       } catch (error) {
         end("error");
-        console.error("Gmail Auto Unsubscribe stopped:", error);
+        console.error("UnsubSweep stopped:", error);
       } finally {
         doc.removeEventListener("click", guardClicks, { capture: true });
         win.removeEventListener("hashchange", onHashChange);
@@ -315,7 +315,7 @@
       case "running":
         return `Running: ${counts}.`;
       case "done":
-        return `Done: ${counts}.`;
+        return `Swept: ${counts}.`;
       case "limit":
         return `Paused after ${LIMITS.maxRows} senders: ${counts}. Press Start to continue.`;
       case "left-page":

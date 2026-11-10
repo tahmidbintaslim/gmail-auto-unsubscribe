@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- UnsubSweep mark: a broom sweeping an envelope away, on a rounded accent tile. -->
+  <rect width="128" height="128" rx="28" fill="#E8590C"/>
+  <!-- envelope, top left -->
+  <rect x="16" y="20" width="40" height="28" rx="5" fill="none" stroke="#FFF7ED" stroke-width="6"/>
+  <path d="M18 23 L36 37 L54 23" fill="none" stroke="#FFF7ED" stroke-width="6" stroke-linejoin="round"/>
+  <!-- handle -->
+  <path d="M108 16 L74 60" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+  <!-- binding -->
+  <path d="M64 54 L84 70" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+  <!-- bristles fanning out -->
+  <path d="M60 60 L88 76 L74 114 L22 92 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M68 70 L40 99 M76 74 L58 108 M62 64 L28 88" stroke="#E8590C" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -18,6 +18,24 @@ describe("manifest.json", () => {
     expect(manifest.background).toBeUndefined();
   });
 
+  it("is branded UnsubSweep", () => {
+    expect(manifest.name).toBe("UnsubSweep: Bulk Unsubscribe for Gmail");
+    expect(manifest.short_name).toBe("UnsubSweep");
+    expect(manifest.version).toBe("1.0.0");
+  });
+
+  it("ships icons of the declared size", () => {
+    expect(Object.keys(manifest.icons).sort()).toEqual(["128", "16", "48"]);
+    expect(manifest.action.default_icon).toEqual(manifest.icons);
+    for (const [size, path] of Object.entries(manifest.icons)) {
+      expect(existsSync(join(root, path)), path).toBe(true);
+      const buf = readFileSync(join(root, path));
+      // PNG signature, then IHDR width and height as big-endian uint32.
+      expect(buf.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+      expect([buf.readUInt32BE(16), buf.readUInt32BE(20)]).toEqual([Number(size), Number(size)]);
+    }
+  });
+
   it("points at files that exist", () => {
     expect(existsSync(join(root, manifest.action.default_popup))).toBe(true);
   });

@@ -1,0 +1,19 @@
+{
+  "name": "unsubsweep-ext",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "preact": "11.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.3.7",
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2",
+    "wxt": "0.21.5"
+  }
+}
