@@ -6,12 +6,12 @@
 [![CodeQL](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/github/license/tahmidbintaslim/gmail-auto-unsubscribe)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/tahmidbintaslim/gmail-auto-unsubscribe/main)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/commits/main)
-[![Demo](https://img.shields.io/badge/demo-stand--in%20page-0b5fff)](https://gmail-auto-unsubscribe-demo.vercel.app)
+[![Demo](https://img.shields.io/badge/demo-stand--in%20page-0b5fff)](https://unsubsweep.vercel.app/demo/)
 [![GitHub stars](https://img.shields.io/github/stars/tahmidbintaslim/gmail-auto-unsubscribe?style=flat)](https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/stargazers)
 
 **UnsubSweep** is a Chrome extension (Manifest V3) that works through Gmail's Manage subscriptions page for you: it clicks Unsubscribe for each sender and confirms Gmail's dialog. It uses no Gmail API, no OAuth and no server; it clicks in the Gmail tab you already have open.
 
-**Status: preparing v1 for the Chrome Web Store.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. Until the listing is live, install it with Load unpacked. Website and privacy policy: [`site/`](site/) (served at `/` and `/privacy`).
+**Status: preparing v1 for the Chrome Web Store.** It is tested against a hand-written stand-in for Gmail's page, not yet on a live Gmail account. Until the listing is live, install it with Load unpacked. Website, docs and privacy policy: [unsubsweep.vercel.app](https://unsubsweep.vercel.app) (source in [`web/`](web/)).
 
 ![The UnsubSweep popup showing "Running: 1 unsubscribed, 0 skipped." next to a stand-in subscriptions list with four senders left](docs/images/demo-running.png)
 
@@ -29,7 +29,7 @@ git clone https://github.com/tahmidbintaslim/gmail-auto-unsubscribe.git
 2. In Gmail, open **Manage subscriptions** (left menu, maybe under **More**).
 3. Click the extension icon, then **Start Unsubscribing**. Press **Stop** at any time.
 
-No `npm install` is needed to use it. To watch it run without Gmail, open the [hosted demo](https://gmail-auto-unsubscribe-demo.vercel.app) or run `npm run demo`.
+No `npm install` is needed to use it. To watch it run without Gmail, open the [hosted demo](https://unsubsweep.vercel.app/demo/) or run `npm run demo`.
 
 ## Contents
 
@@ -188,7 +188,7 @@ A full run, recorded with Playwright from `npm run demo` (15 seconds):
 
 ![A recorded run of the demo: the popup counts each sender as the loop clicks Unsubscribe and confirms the dialog, ending at "Swept: 4 unsubscribed, 1 skipped."](docs/images/demo-run.gif)
 
-Hosted copy: [gmail-auto-unsubscribe-demo.vercel.app](https://gmail-auto-unsubscribe-demo.vercel.app) (served by Vercel from `vercel.json`: `/` is the landing page, `/demo/` this demo, `/privacy` the privacy policy). The demo is a stand-in, not Gmail.
+Hosted copy: [unsubsweep.vercel.app/demo/](https://unsubsweep.vercel.app/demo/) (served by Vercel from `vercel.json`: `/` is the landing page, `/demo/` this demo, `/privacy` the privacy policy). The demo is a stand-in, not Gmail.
 
 The demo is a way to watch the loop, not evidence that it works on real Gmail: it uses the same stand-in markup as the tests.
 
@@ -228,14 +228,14 @@ demo/                 Browser demo of the real files against the fixtures (not s
 scripts/serve-demo.mjs  Dependency-free local server for the demo (npm run demo)
 docs/images/          README screenshots, captured from demo/
 icons/, brand/        Toolbar and store icons; brand/mark.svg is the source (npm run icons)
-site/                 Landing page and privacy policy (not shipped in the extension)
+web/                  Product website: Vite, GSAP, three.js (not shipped in the extension)
 scripts/package.mjs   Builds the Chrome Web Store zip (npm run package)
 ```
 
 ## Deployment
 
 - **Extension:** `npm run package` writes `dist/unsubsweep-<version>.zip` with only the shipped files. Upload it with the copy in [`docs/store-listing.md`](docs/store-listing.md). The name uses "for Gmail" only, per Google's branding rules.
-- **Website:** Vercel serves the repository as static files: `/` is [`site/index.html`](site/index.html), `/privacy` is [`site/privacy.html`](site/privacy.html), and `/demo/` is the demo.
+- **Website:** Vercel builds [`web/`](web/) (`npm run build --prefix web`) and serves `web/dist` at [unsubsweep.vercel.app](https://unsubsweep.vercel.app). The build copies the demo in, so `/demo/` keeps working. `npm run smoke --prefix web` checks every page in a headless browser.
 - **Launch posts:** [`docs/launch.md`](docs/launch.md).
 
 ## Manual test on real Gmail

@@ -55,7 +55,7 @@ UnsubSweep is not affiliated with or endorsed by Google. Gmail is a trademark of
 - **`scripting` justification:** Injects the extension's own two script files (`unsubscriber.js`, `content.js`) into that tab when the user presses Start. No remote code; nothing runs before Start.
 - **Remote code:** No, I am not using remote code.
 - **Data usage:** I do not collect or use user data. Tick all three certifications.
-- **Privacy policy URL:** `https://unsubsweep.com/privacy`. The page must be live before you submit. Until the domain is set up, deploy the repo to Vercel and use `https://<project>.vercel.app/privacy`.
+- **Privacy policy URL:** `https://unsubsweep.vercel.app/privacy` (live). Switch to `https://unsubsweep.com/privacy` once the domain points at the Vercel project.
 
 ## Account
 

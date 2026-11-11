@@ -32,6 +32,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             ext/package-lock.json
+            web/package-lock.json
       - run: npm ci
       # v2 extension deps (ext/); its postinstall runs `wxt prepare`.
       - run: npm ci --prefix ext
@@ -40,5 +41,8 @@ jobs:
         working-directory: ext
       - run: npx wxt build
         working-directory: ext
+      # Website: typecheck and build, then copy the demo into web/dist.
+      - run: npm ci --prefix web
+      - run: npm run build --prefix web
       - run: npm run package
       - run: unzip -l dist/unsubsweep-*.zip

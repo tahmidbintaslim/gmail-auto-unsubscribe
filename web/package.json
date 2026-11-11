@@ -1,0 +1,23 @@
+{
+  "name": "unsubsweep-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "UnsubSweep product website (Vite multi-page). Not shipped in the extension.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/copy-static.mjs",
+    "preview": "node scripts/smoke.mjs --serve",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "gsap": "3.15.0",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.186.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  }
+}

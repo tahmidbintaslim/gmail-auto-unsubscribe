@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docs: UnsubSweep</title>
+  <meta name="description" content="Install and use UnsubSweep, what it clicks, its permissions, troubleshooting, and developer setup.">
+  <link rel="icon" href="/icons/icon48.png">
+  <link rel="stylesheet" href="/src/style.css">
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+  <!--header-->
+
+  <main id="main">
+    <header class="page-head">
+      <h1>Docs</h1>
+      <p class="lede">Everything the extension does, in plain words. Short on purpose: there is not much of it.</p>
+    </header>
+
+    <div class="docs">
+      <nav class="toc" aria-label="On this page">
+        <p>Using it</p>
+        <ul>
+          <li><a href="#install">Install</a></li>
+          <li><a href="#use">Use</a></li>
+          <li><a href="#clicks">What it clicks</a></li>
+          <li><a href="#stops">When a run stops</a></li>
+          <li><a href="#never">What it never does</a></li>
+          <li><a href="#permissions">Permissions</a></li>
+          <li><a href="#trouble">Troubleshooting</a></li>
+        </ul>
+        <p>Developers</p>
+        <ul>
+          <li><a href="#dev">Run the tests</a></li>
+          <li><a href="#layout">Repository layout</a></li>
+          <li><a href="#v2">Pro core (in development)</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+        </ul>
+      </nav>
+
+      <article class="prose">
+        <h2 id="install">Install</h2>
+        <p>The Chrome Web Store listing is on its way. Until then, install from source. It takes a minute and needs no build step.</p>
+        <ol>
+          <li>Download or clone <a href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe">the repository</a>.</li>
+          <li>Open <code>chrome://extensions</code> and turn on <strong>Developer mode</strong>.</li>
+          <li>Click <strong>Load unpacked</strong> and choose the repository folder.</li>
+        </ol>
+
+        <h2 id="use">Use</h2>
+        <ol>
+          <li>In Gmail on your computer, open <strong>Manage subscriptions</strong> in the left menu (it may be under <strong>More</strong>).</li>
+          <li>Click the UnsubSweep icon, then <strong>Start sweep</strong>.</li>
+          <li>Leave the tab alone while it runs. Press <strong>Stop</strong> at any time.</li>
+        </ol>
+        <p><strong>There is no undo.</strong> A run goes through every sender on the page, and the extension cannot re-subscribe you. Only press Start when you want to leave every list shown.</p>
+        <p>Closing the popup does not stop a run. Open it again to see the counts.</p>
+
+        <h2 id="clicks">What it clicks</h2>
+        <ul>
+          <li>Each visible <strong>Unsubscribe</strong> button in the sender list, from the bottom row up. Each sender gets one try per run.</li>
+          <li>In the dialog that opens: <strong>Unsubscribe</strong> when Gmail offers a one-click unsubscribe, otherwise <strong>Cancel</strong>, and the sender counts as skipped.</li>
+          <li><strong>Go to website</strong> only if you tick the box in the popup, and then at most 5 times per run. That opens the sender's own site in a new tab, where you finish by hand.</li>
+        </ul>
+        <p>It waits about a second between senders, so a long list takes a few minutes.</p>
+
+        <h2 id="stops">When a run stops</h2>
+        <ul>
+          <li>No sender is left that the run has not tried: <strong>Swept</strong>.</li>
+          <li>You press <strong>Stop</strong>.</li>
+          <li>The tab leaves the Manage subscriptions list, for example when you open a message.</li>
+          <li>250 senders in one run. Press Start again to continue.</li>
+          <li>A Gmail dialog stays open after Unsubscribe. The run stops instead of guessing.</li>
+        </ul>
+
+        <h2 id="never">What it never does</h2>
+        <ul>
+          <li>It never opens, reads, moves, labels or deletes your email.</li>
+          <li>It never runs on a tab you did not open the popup from, or on any site other than <code>mail.google.com</code>.</li>
+          <li>It never clicks the Unsubscribe link inside a message.</li>
+          <li>It makes no network requests of its own, stores nothing, and loads no code from the internet. See the <a href="/privacy">privacy policy</a>.</li>
+        </ul>
+
+        <h2 id="permissions">Permissions</h2>
+        <table>
+          <thead><tr><th>Permission</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td><code>activeTab</code></td><td>Access to the Gmail tab you opened the popup from, only when you open it.</td></tr>
+            <tr><td><code>scripting</code></td><td>Adds the unsubscribe loop to that tab when you press Start.</td></tr>
+          </tbody>
+        </table>
+        <p>No host permissions, so Chrome shows no site-access warning on install.</p>
+
+        <h2 id="trouble">Troubleshooting</h2>
+        <ul>
+          <li><strong>"Open Gmail first."</strong> The active tab is not on <code>mail.google.com</code>.</li>
+          <li><strong>"Open Gmail's Manage subscriptions page first."</strong> You are in Gmail but not on that list. Its address ends in <code>#sub</code>.</li>
+          <li><strong>It finds nothing to click.</strong> UnsubSweep matches Gmail's English labels. Set Gmail's language to English, or your account may not have the Manage subscriptions page yet.</li>
+          <li><strong>"Could not run on this tab."</strong> Reload Gmail and try again.</li>
+          <li><strong>A sender is still emailing you.</strong> Unsubscribes can take a few days to take effect on the sender's side.</li>
+        </ul>
+        <p>Something else? <a href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/issues">Open an issue</a>.</p>
+
+        <h2 id="dev">Run the tests</h2>
+<pre><code>git clone https://github.com/tahmidbintaslim/gmail-auto-unsubscribe.git
+cd gmail-auto-unsubscribe
+npm ci
+npm test</code></pre>
+        <p>The tests run the extension's own files against a hand-written stand-in for Gmail's page. <code>npm run demo</code> serves the same thing in your browser, and <code>npm run package</code> builds the store zip.</p>
+
+        <h2 id="layout">Repository layout</h2>
+        <table>
+          <thead><tr><th>Path</th><th>What</th></tr></thead>
+          <tbody>
+            <tr><td><code>manifest.json</code>, <code>popup.*</code>, <code>unsubscriber.js</code>, <code>content.js</code></td><td>The free extension. Plain JavaScript, no build.</td></tr>
+            <tr><td><code>test/</code>, <code>demo/</code></td><td>Tests, fixtures and the browser demo.</td></tr>
+            <tr><td><code>ext/</code></td><td>The Pro core, in development (WXT, TypeScript, Preact).</td></tr>
+            <tr><td><code>web/</code></td><td>This website (Vite, GSAP, three.js).</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="v2">Pro core <span class="badge">In development</span></h2>
+        <p>The Pro version signs in with Google and uses the Gmail API in your browser, so it can rank senders and unsubscribe without Gmail's page. It is not released. Mail data still never reaches a server of ours.</p>
+<pre><code>cd ext
+npm ci
+WXT_GOOGLE_CLIENT_ID=your-client-id npx wxt build</code></pre>
+        <p>Load <code>ext/.output/chrome-mv3</code> unpacked. You need your own Google OAuth client; <a href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/blob/main/ext/README.md">ext/README.md</a> has the steps.</p>
+
+        <h2 id="roadmap">Roadmap</h2>
+        <ul>
+          <li><strong>Now:</strong> the free extension on the Chrome Web Store.</li>
+          <li><strong>Next</strong> <span class="badge">In development</span>: Pro with smart recommendations, sender categories, plain-English rules and a newsletter digest. AI runs on your device or with your own key.</li>
+          <li><strong>Later:</strong> a local MCP server, a Claude Skill and a Claude Code plugin, so Claude can tidy your subscriptions when you ask it to.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <!--footer-->
+</body>
+</html>

@@ -6,3 +6,4 @@ ext/.output/
 ext/.wxt/
 .output/
 .wxt/
+web/node_modules/

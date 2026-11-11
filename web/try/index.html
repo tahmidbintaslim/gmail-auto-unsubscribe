@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Try it: UnsubSweep</title>
+  <meta name="description" content="Run UnsubSweep's real code against a stand-in Gmail page, right here. No Gmail account needed.">
+  <link rel="icon" href="/icons/icon48.png">
+  <link rel="stylesheet" href="/src/style.css">
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+  <!--header-->
+
+  <main id="main">
+    <header class="page-head">
+      <h1>Take it for a sweep.</h1>
+      <p class="lede">This is the extension's own code running against a hand-written stand-in for Gmail. No account, no real email, nothing leaves this page.</p>
+    </header>
+    <div class="try">
+      <div class="chrome">
+        <div class="chrome-bar" aria-hidden="true">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="url">mail.google.com/mail/u/0/#sub (stand-in)</span>
+        </div>
+        <iframe src="/demo/" title="UnsubSweep demo: the extension popup next to a stand-in Gmail subscriptions page" loading="lazy"></iframe>
+      </div>
+      <aside class="guide" aria-labelledby="guide-title">
+        <h2 id="guide-title" style="font-size:1.8rem">What to do</h2>
+        <ol>
+          <li>Look at the stand-in list: five senders, one of which only offers Go to website.</li>
+          <li>Press <strong>Start sweep</strong> in the popup.</li>
+          <li>Watch each dialog open and get confirmed, one sender at a time, bottom row first.</li>
+          <li>The popup should end on <strong>Swept: 4 unsubscribed, 1 skipped.</strong> Example Travel stays, because it has no one-click option.</li>
+          <li>Press <strong>Reset</strong> and try again with the website box ticked. The click is counted; in the demo it opens nothing.</li>
+        </ol>
+        <p class="note">On a phone? It works, but the demo is easier on a wider screen. <a href="/demo/">Open the demo on its own</a>.</p>
+        <p class="note">This is a stand-in, not Gmail, so it shows how the loop behaves, not proof that it works on your account.</p>
+      </aside>
+    </div>
+  </main>
+
+  <!--footer-->
+</body>
+</html>
