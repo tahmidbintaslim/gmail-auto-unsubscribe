@@ -228,7 +228,7 @@ demo/                 Browser demo of the real files against the fixtures (not s
 scripts/serve-demo.mjs  Dependency-free local server for the demo (npm run demo)
 docs/images/          README screenshots, captured from demo/
 icons/, brand/        Toolbar and store icons; brand/mark.svg is the source (npm run icons)
-web/                  Product website: Vite, GSAP, three.js (not shipped in the extension)
+web/                  Product website: Vite and GSAP (not shipped in the extension)
 scripts/package.mjs   Builds the Chrome Web Store zip (npm run package)
 ```
 

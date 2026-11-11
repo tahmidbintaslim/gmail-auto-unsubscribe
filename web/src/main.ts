@@ -1,82 +1,79 @@
-// Shared by every page. Hero text and all content are plain HTML; this file only adds motion.
-// With prefers-reduced-motion it imports neither three.js nor GSAP, so nothing pins or animates.
+// Shared by every page. All content is plain HTML; this file adds the hero's
+// working mini-demo and, when motion is allowed, scroll reveals.
 
 const here = location.pathname.replace(/(index)?\.html$/, "").replace(/\/$/, "");
 for (const a of document.querySelectorAll<HTMLAnchorElement>(".site-head nav a")) {
-  const href = a.getAttribute("href") ?? "";
-  if (href.startsWith("/") && href.replace(/\/$/, "") === here && here) a.setAttribute("aria-current", "page");
+  const href = (a.getAttribute("href") ?? "").replace(/\/$/, "");
+  if (here && href === here) a.setAttribute("aria-current", "page");
 }
 
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const hasWebGL = () => {
-  try {
-    const gl = document.createElement("canvas").getContext("webgl2");
-    gl?.getExtension("WEBGL_lose_context")?.loseContext();
-    return !!gl;
-  } catch {
-    return false;
-  }
-};
+// The hero demo: a pretend subscriptions list the visitor can sweep. Works without GSAP.
+const stage = document.getElementById("sweep");
+if (stage) {
+  const rows = [...stage.querySelectorAll<HTMLLIElement>(".win:not(.before) .rows li")];
+  const start = stage.querySelector<HTMLButtonElement>(".start")!;
+  const reset = stage.querySelector<HTMLButtonElement>(".stop")!;
+  const out = stage.querySelector("output")!;
+  let timer = 0;
+  let touched = false;
 
-const sweepStatus = (hit: number, total: number) => {
-  if (hit < 0) return "Ready";
-  if (hit >= total) return `Swept: ${hit} unsubscribed, 0 skipped.`;
-  return `Running: ${hit} unsubscribed, 0 skipped.`;
-};
-
-async function enhance() {
-  const art = document.getElementById("hero-art");
-  const how = document.getElementById("how");
-  if (!art && !how) return;
-
-  const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Hero first: ScrollTriggers must be created in page order.
-  if (art && hasWebGL()) {
-    const hero = art.closest<HTMLElement>(".hero")!;
-    const label = document.getElementById("sweep-status")!;
-    const { startHero } = await import("./hero3d");
-    const scene = startHero(art, {
-      mobile: matchMedia("(max-width: 700px), (pointer: coarse)").matches,
-      onCount: (hit, total) => (label.textContent = sweepStatus(hit, total)),
+  const paint = (done: number, running: boolean) => {
+    // Like the real extension, it works from the bottom row up.
+    rows.forEach((li, i) => {
+      const n = rows.length - 1 - i;
+      li.classList.toggle("is-gone", n < done);
+      li.classList.toggle("is-now", running && n === done);
+      li.querySelector(".pill")!.textContent = n < done ? "Unsubscribed" : running && n === done ? "Unsubscribing" : "Unsubscribe";
     });
-    if (scene) {
-      art.classList.add("is-live");
-      hero.classList.add("can-sweep");
-      ScrollTrigger.create({
-        trigger: hero,
-        // Pin once the whole hero is in view, so the art is never cut off on phones.
-        start: "bottom bottom",
-        end: "+=110%",
-        pin: true,
-        scrub: 0.6,
-        onUpdate: (st) => scene.setProgress(st.progress),
-      });
-    }
-  }
+    out.textContent = !running && done === 0 ? "Ready" : `${running ? "Running" : "Swept"}: ${done} unsubscribed, 0 skipped.`;
+    start.disabled = running;
+  };
 
-  if (how) {
-    const steps = [...how.querySelectorAll("li")];
-    const show = (n: number) => steps.forEach((li, i) => li.classList.toggle("is-active", i === n));
-    gsap.matchMedia().add("(min-width: 900px)", () => {
-      how.classList.add("is-pinned");
-      ScrollTrigger.create({
-        trigger: how,
-        start: "top top",
-        end: "+=150%",
-        pin: true,
-        onUpdate: (st) => show(Math.min(steps.length - 1, Math.floor(st.progress * steps.length))),
-      });
-      return () => {
-        how.classList.remove("is-pinned");
-        show(0);
-      };
-    });
-  }
-  ScrollTrigger.refresh();
+  const run = () => {
+    clearInterval(timer);
+    let done = 0;
+    paint(done, true);
+    timer = window.setInterval(() => {
+      done += 1;
+      const finished = done >= rows.length;
+      paint(done, !finished);
+      if (finished) clearInterval(timer);
+    }, reducedMotion ? 250 : 800);
+  };
+
+  start.addEventListener("click", () => ((touched = true), run()));
+  reset.addEventListener("click", () => {
+    touched = true;
+    clearInterval(timer);
+    paint(0, false);
+  });
+  // Show it once by itself so the page explains the product before anyone clicks.
+  if (!reducedMotion) setTimeout(() => touched || run(), 1400);
 }
 
-// After first paint, so the HTML hero is on screen before any heavy JS loads.
-if (!reducedMotion) requestAnimationFrame(() => setTimeout(enhance, 0));
+async function reveal() {
+  const targets = document.querySelectorAll<HTMLElement>(".panel, .statement .wrap, .plan, .demo-frame, .finale");
+  if (!targets.length) return;
+  const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
+  gsap.registerPlugin(ScrollTrigger);
+  for (const el of targets) {
+    // Anything already on screen stays put; only content below the fold animates in.
+    if (el.getBoundingClientRect().top < innerHeight * 0.9) continue;
+    el.classList.add("will-reveal");
+    gsap.to(el, {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      ease: "expo.out",
+      scrollTrigger: { trigger: el, start: "top 88%", once: true },
+      onComplete: () => el.classList.remove("will-reveal"),
+    });
+    // The product shot inside a panel drifts up a little slower than the panel.
+    const show = el.querySelector(".show > *");
+    if (show) gsap.from(show, { y: 60, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 80%", once: true } });
+  }
+}
+
+if (!reducedMotion) requestAnimationFrame(() => setTimeout(reveal, 0));

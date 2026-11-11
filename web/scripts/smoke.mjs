@@ -35,7 +35,7 @@ if (serveOnly) {
   const { chromium } = createRequire(import.meta.url)("playwright");
   const browser = await chromium.launch();
   const failures = [];
-  const routes = ["/", "/features/", "/try/", "/docs/", "/privacy", "/demo/"];
+  const routes = ["/", "/try/", "/docs/", "/privacy", "/demo/"];
   try {
     for (const reducedMotion of ["no-preference", "reduce"]) {
       for (const width of [360, 1280]) {

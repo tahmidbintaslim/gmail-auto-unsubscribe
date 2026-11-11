@@ -41,26 +41,37 @@ describe("landing page", () => {
   // The header and footer are inlined into every page at build time.
   const html = ["web/index.html", "web/src/partials/header.html", "web/src/partials/footer.html"].map(read).join("\n");
 
-  it("links to the privacy policy, features, docs and the demo", () => {
+  it("links to the privacy policy, help, the demo and both in-page sections", () => {
     const hrefs = [...new JSDOM(html).window.document.querySelectorAll("a")].map((a) => a.getAttribute("href"));
-    for (const href of ["/privacy", "/features/", "/docs/", "/try/", "/demo/"]) expect(hrefs).toContain(href);
+    for (const href of ["/privacy", "/docs/", "/try/", "/demo/", "/#how", "/#safe"]) expect(hrefs).toContain(href);
+    const doc = new JSDOM(html).window.document;
+    for (const id of ["how", "safe", "plans"]) expect(doc.getElementById(id), id).toBeTruthy();
   });
 
   it("puts the hero headline in the HTML, not behind JavaScript", () => {
-    expect(new JSDOM(html).window.document.querySelector("h1").textContent).toMatch(/Bulk unsubscribe from Gmail/);
+    expect(new JSDOM(html).window.document.querySelector("h1").textContent).toMatch(/Unsubscribe from every newsletter in one click/);
   });
 
-  it("loads no 3D or scroll animation when reduced motion is preferred", () => {
+  it("loads no scroll animation when reduced motion is preferred", () => {
     const main = read("web/src/main.ts");
     expect(main).toMatch(/prefers-reduced-motion: reduce/);
-    expect(main).toMatch(/if \(!reducedMotion\)/);
-    // three.js and GSAP only ever arrive through dynamic imports inside enhance().
+    expect(main).toMatch(/if \(!reducedMotion\) requestAnimationFrame/);
+    // GSAP only ever arrives through a dynamic import inside reveal().
     expect(main).not.toMatch(/^import /m);
   });
 
-  it("labels every Pro mention on the features page as in development", () => {
-    const pro = new JSDOM(read("web/features/index.html")).window.document.querySelector(".pro");
-    expect(pro.textContent).toMatch(/In development/);
+  it("labels every Pro block as in development", () => {
+    const doc = new JSDOM(html).window.document;
+    const pro = [...doc.querySelectorAll(".pro")];
+    expect(pro.length).toBe(2);
+    for (const el of pro) expect(el.textContent).toMatch(/In development/);
+  });
+
+  it("is honest about the limits next to the claims", () => {
+    expect(html).toMatch(/no undo/i);
+    expect(html).toMatch(/not yet on a live account/i);
+    // No invented proof: the product has no users or reviews yet.
+    expect(html).not.toMatch(/reviews|rated|trusted by|loved by|users worldwide/i);
   });
 });
 

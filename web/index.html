@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>UnsubSweep: bulk unsubscribe for Gmail, without inbox access</title>
+  <title>UnsubSweep: unsubscribe from every Gmail newsletter in one click</title>
   <meta name="description" content="Bulk unsubscribe from Gmail newsletters in one click. Runs in your browser: no inbox access, no servers, no data.">
   <link rel="icon" href="/icons/icon48.png">
   <link rel="stylesheet" href="/src/style.css">
@@ -14,182 +14,209 @@
 
   <main id="main">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <h1 id="hero-title">Bulk unsubscribe from Gmail. Without giving anyone your inbox.</h1>
-        <p class="lede">UnsubSweep presses Unsubscribe on Gmail's own Manage subscriptions page, sender after sender, in the tab you already have open. No sign-in, no servers, no peeking.</p>
-        <div class="actions">
-          <a class="button" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#install-load-unpacked">Install free from GitHub</a>
-          <a class="button ghost" href="/try/">Watch it run</a>
-        </div>
-        <p class="note">Open source. Two permissions. The Chrome Web Store listing is on its way.</p>
-        <p class="scroll-hint" aria-hidden="true">Scroll down. The envelopes have had a good run.</p>
-      </div>
-      <div class="hero-art" id="hero-art">
-        <img src="/hero-static.svg" width="800" height="640" alt="" fetchpriority="high">
-        <p class="visually-hidden">Illustration: paper envelopes drift in a warm field until a sweeping arc brushes them all out of the frame.</p>
-        <p class="sweep-status" id="sweep-status" aria-hidden="true">Ready</p>
-      </div>
-    </section>
-
-    <section class="section how" id="how" aria-labelledby="how-title">
-      <header>
-        <h2 id="how-title">Three steps, and the third is a cup of tea</h2>
-      </header>
-      <ol class="steps">
-        <li class="is-active">
-          <div>
-            <h3>Open Manage subscriptions</h3>
-            <p>It is in Gmail's left menu, sometimes tucked under More. That list is the only place UnsubSweep will work.</p>
-          </div>
-          <img class="shot" src="/docs/store/screenshot-1-ready.png" width="1280" height="800" loading="lazy" alt="The UnsubSweep popup reading Ready, beside a stand-in subscriptions list with five senders">
-        </li>
-        <li>
-          <div>
-            <h3>Press Start sweep</h3>
-            <p>Clicking the icon lends it that one tab, for now. Nothing runs in Gmail until you press the button.</p>
-          </div>
-          <img class="shot" src="/docs/store/screenshot-2-running.png" width="1280" height="800" loading="lazy" alt="Mid-run: a dialog asks to unsubscribe from Example Blog while the popup counts the run">
-        </li>
-        <li>
-          <div>
-            <h3>Put the kettle on</h3>
-            <p>It confirms each one-click Unsubscribe, about a second apiece, from the bottom row up. A sender without one is skipped, or sent to its own website if you allow it.</p>
-          </div>
-          <img class="shot" src="/docs/store/screenshot-3-swept.png" width="1280" height="800" loading="lazy" alt="The popup reads Swept: 4 unsubscribed, 1 skipped, with one website-only sender left in the list">
-        </li>
-      </ol>
-      <div class="caution">
-        <p><strong>No undo, no keep-list yet.</strong> A run goes through every sender on the page, so press Start when you mean it. Want to watch first? <a href="/demo/">Run the real code in the demo</a>.</p>
-      </div>
-    </section>
-
-    <section class="section" id="privacy" aria-labelledby="zero-title">
-      <header>
-        <h2 id="zero-title">Your inbox stays your business.</h2>
-        <p class="lede">Most unsubscribe tools want to read your mail on their servers. UnsubSweep doesn't have a server to read it on.</p>
-      </header>
-      <div class="zero">
-        <figure style="margin:0">
-          <svg class="flow" viewBox="0 0 640 430" role="img" aria-labelledby="flow-title flow-desc">
-            <title id="flow-title">Where data goes</title>
-            <desc id="flow-desc">Inside your browser, the UnsubSweep popup talks only to your Gmail tab. The Gmail tab sends Gmail the same unsubscribe requests your own clicks would. If you allow it, it opens a sender's website, at most five per run. Nothing goes to UnsubSweep, because there are no UnsubSweep servers.</desc>
-            <rect class="browser" x="8" y="8" width="380" height="300" rx="22"/>
-            <text class="title" x="32" y="44">Your browser</text>
-            <rect class="box" x="32" y="70" width="140" height="74" rx="12"/>
-            <text x="48" y="102">Popup</text>
-            <text class="small" x="48" y="124">Start, Stop, counts</text>
-            <rect class="box" x="220" y="70" width="146" height="214" rx="12"/>
-            <text x="236" y="102">Your Gmail tab</text>
-            <text class="small" x="236" y="124">Manage</text>
-            <text class="small" x="236" y="142">subscriptions</text>
-            <text class="small" x="236" y="190">Counts live here,</text>
-            <text class="small" x="236" y="208">in memory, until</text>
-            <text class="small" x="236" y="226">the tab reloads.</text>
-            <path class="wire" d="M172 107 H 216"/>
-            <path class="arrow" d="M216 101 L 226 107 L 216 113 Z"/>
-            <rect class="box" x="460" y="70" width="170" height="74" rx="12"/>
-            <text x="476" y="102">Gmail</text>
-            <text class="small" x="476" y="124">The same requests</text>
-            <text class="small" x="476" y="138">as your own clicks</text>
-            <path class="wire" d="M366 107 H 454"/>
-            <path class="arrow" d="M454 101 L 464 107 L 454 113 Z"/>
-            <rect class="box" x="460" y="186" width="170" height="80" rx="12"/>
-            <text x="476" y="216">Sender's website</text>
-            <text class="small" x="476" y="238">Only if you tick the box,</text>
-            <text class="small" x="476" y="254">at most 5 per run</text>
-            <path class="wire" d="M366 226 H 454"/>
-            <path class="arrow" d="M454 220 L 464 226 L 454 232 Z"/>
-            <rect class="box" x="96" y="352" width="260" height="66" rx="12" stroke-dasharray="5 6"/>
-            <text x="116" y="380">UnsubSweep servers</text>
-            <text class="small" x="116" y="402">There aren't any.</text>
-            <path class="dead" d="M226 308 V 348"/>
-            <path class="x" d="M216 318 L 236 338 M236 318 L 216 338"/>
-          </svg>
-        </figure>
+      <div>
+        <h1 id="hero-title">Unsubscribe from every newsletter in one click</h1>
+        <p class="lede">UnsubSweep clears your Gmail subscriptions for you. It's free, and it never reads your email.</p>
+        <a class="button" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#install-load-unpacked">Get UnsubSweep <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 4.5L14.5 9 10 13.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
         <ul class="facts">
-          <li><strong>No Gmail API, no OAuth, no tokens.</strong> Nothing shows up under third-party access in your Google account, because nothing asked.</li>
-          <li><strong>No network requests of its own.</strong> Gmail sends the unsubscribe requests, exactly as if you had clicked. Go to website, if you turn it on, opens the sender's own site in a new tab.</li>
-          <li><strong>Nothing stored.</strong> Counts live in memory and vanish with the tab. No storage, no remote code, no analytics.</li>
-          <li><strong>Read every line.</strong> Four small files on GitHub. Then read the <a href="/privacy">privacy policy</a>, which is short for a reason.</li>
+          <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Free</li>
+          <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> No sign-in</li>
+          <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Open source</li>
         </ul>
+        <p class="note">For Chrome on a computer. Install from GitHub today; the Chrome Web Store listing is coming.</p>
+      </div>
+
+      <div class="stage" id="sweep" aria-label="A pretend Gmail subscriptions list. Press Start sweep to watch UnsubSweep clear it.">
+        <div class="win before" aria-hidden="true"><div class="win-bar"><i></i><i></i><i></i></div><ul class="rows"><li><b>Shop Daily</b><span class="pill">Unsubscribe</span></li><li><b>Travel Deals</b><span class="pill">Unsubscribe</span></li><li><b>App Updates</b><span class="pill">Unsubscribe</span></li><li><b>Club News</b><span class="pill">Unsubscribe</span></li><li><b>Blog Weekly</b><span class="pill">Unsubscribe</span></li><li><b>News Digest</b><span class="pill">Unsubscribe</span></li><li><b>Deal Alerts</b><span class="pill">Unsubscribe</span></li></ul></div>
+        <svg class="arrow" viewBox="0 0 120 90" fill="none" aria-hidden="true"><path d="M6 20c30-22 70-18 84 6 10 18-8 30-20 20-10-9 2-26 24-20 14 4 18 22 14 44" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M98 62l10 10 8-13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="win">
+          <div class="win-bar"><i></i><i></i><i></i><span>Pretend inbox</span></div>
+          <div class="win-head"><b>Manage subscriptions</b></div>
+          <ul class="rows">
+            <li><span class="av" style="background:#C2360F">S</span><span><b>Shop Daily</b><small>14 emails a month</small></span><span class="pill">Unsubscribe</span></li>
+            <li><span class="av" style="background:#6B3FD0">T</span><span><b>Travel Deals</b><small>9 emails a month</small></span><span class="pill">Unsubscribe</span></li>
+            <li><span class="av" style="background:#0B7A45">A</span><span><b>App Updates</b><small>6 emails a month</small></span><span class="pill">Unsubscribe</span></li>
+            <li><span class="av" style="background:#3B3FBF">C</span><span><b>Club News</b><small>4 emails a month</small></span><span class="pill">Unsubscribe</span></li>
+            <li><span class="av" style="background:#8A5A0B">B</span><span><b>Blog Weekly</b><small>2 emails a month</small></span><span class="pill">Unsubscribe</span></li>
+          </ul>
+        </div>
+        <div class="popup">
+          <span class="brand"><img src="/icons/icon48.png" width="22" height="22" alt="">UnsubSweep</span>
+          <button class="start" type="button">Start sweep</button>
+          <button class="stop" type="button">Reset</button>
+          <output aria-live="polite">Ready</output>
+        </div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="features-title">
-      <header>
-        <h2 id="features-title">Small, on purpose.</h2>
-      </header>
-      <div class="feature-rows">
-        <div><h3>Confirms one-click unsubscribes</h3><p>Clicks the row's Unsubscribe, then the dialog's. One try per sender per run.</p></div>
-        <div><h3>A website fallback with a leash</h3><p>No one-click option? Skip it, or tick the box to open the sender's site. Five tabs per run, tops.</p></div>
-        <div><h3>Knows when to stop</h3><p>You press Stop, the list ends, you leave the page, 250 senders pass, or a dialog misbehaves.</p></div>
-        <div><h3>Counts you can watch</h3><p>Unsubscribed, skipped and websites opened, live in the popup. Close it; the run carries on.</p></div>
-        <div><h3>Two permissions, no warning</h3><p><code>activeTab</code> and <code>scripting</code>. No host access, so Chrome shows no site-access warning.</p></div>
-      </div>
-      <p style="margin-top:24px"><a href="/features/">See every feature, and what's coming</a></p>
-    </section>
-
-    <section class="section" aria-labelledby="plans-title">
-      <header>
-        <h2 id="plans-title">Free today, with a smarter Pro on the way</h2>
-        <p class="lede">The free sweep stays free and stays zero-access. Pro is a separate, opt-in layer we're building in the open.</p>
-      </header>
-      <div class="plans-wrap">
-        <table class="plans">
-          <thead>
-            <tr><th scope="col"><span class="visually-hidden">Feature</span></th><th scope="col">Free</th><th scope="col">Pro <span class="badge">In development</span></th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">Sweep Gmail's Manage subscriptions page</th><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-            <tr><th scope="row">No sign-in, two permissions</th><td class="yes">Yes</td><td>Free sweep stays that way</td></tr>
-            <tr><th scope="row">Recommendations for senders you never open</th><td>No</td><td>Planned</td></tr>
-            <tr><th scope="row">Sender categories</th><td>No</td><td>Planned</td></tr>
-            <tr><th scope="row">Rules in plain English</th><td>No</td><td>Planned</td></tr>
-            <tr><th scope="row">Newsletter digest</th><td>No</td><td>Planned</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="note" style="margin-top:16px">Pro will read Gmail through Google's API, in your browser, only if you opt in. No mail on our servers. <a href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/releases">Watch releases on GitHub</a> to hear when it's ready.</p>
-    </section>
-
-    <section class="section faq" aria-labelledby="faq-title">
-      <header>
-        <h2 id="faq-title">Fair questions.</h2>
-      </header>
-      <details>
-        <summary>Does it read my email?</summary>
-        <p>No. On the Manage subscriptions page it reads button labels, the text of sender rows and the tab's address. It never opens a message.</p>
-      </details>
-      <details>
-        <summary>Has it been tested on real Gmail?</summary>
-        <p>Not yet. It is tested against a hand-written stand-in for Gmail's page. A check on a live account is the next job, and the docs list the steps if you want to try it yourself.</p>
-      </details>
-      <details>
-        <summary>Can I keep some senders?</summary>
-        <p>Not in this version. A run goes through every sender on the page. A preview and keep-list are on the roadmap.</p>
-      </details>
-      <details>
-        <summary>My Gmail is in another language.</summary>
-        <p>Then it finds nothing to click. It matches Gmail's English labels for now.</p>
-      </details>
-      <details>
-        <summary>Is the AI part real?</summary>
-        <p>Not yet. Recommendations, categories, rules and the digest are in development. Nothing AI ships today, and the free sweep never needs it.</p>
-      </details>
-      <details>
-        <summary>Where's the Chrome Web Store link?</summary>
-        <p>The listing is being prepared. Until then, install it with Load unpacked. The <a href="/docs/#install">docs</a> walk you through it in five steps.</p>
-      </details>
-    </section>
-
-    <section class="section finale" aria-labelledby="finale-title">
-      <h2 id="finale-title">Clear the pile.</h2>
-      <p class="lede">Free, open source, and it never asks for your password.</p>
-      <div class="actions">
-        <a class="button" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#install-load-unpacked">Install free from GitHub</a>
-        <a class="button ghost" href="/docs/">Read the docs</a>
+    <section class="statement" id="how">
+      <div class="wrap">
+        <h2>Gmail makes you leave one sender at a time</h2>
+        <p>Click Unsubscribe, wait for the box, confirm, repeat. UnsubSweep does that same clicking for you, down the whole list, while you do something else.</p>
       </div>
     </section>
+
+    <section class="section" aria-label="What it does">
+      <div class="wrap panels">
+        <article class="panel sun">
+          <div>
+            <h3>One click clears the whole list</h3>
+            <p>Open Gmail's Manage subscriptions page and press Start sweep. It unsubscribes from each sender, about one a second.</p>
+            <p class="fine">It goes through every sender on the page, and there's no undo.</p>
+          </div>
+          <div class="show">
+            <div class="win"><div class="win-head"><b>Manage subscriptions</b><span class="pill">2 of 4</span></div>
+              <ul class="rows">
+              <li class="is-gone"><span class="av" style="background:#C2360F">S</span><span><b>Shop Daily</b><small>14 emails a month</small></span><span class="pill">Unsubscribed</span></li>
+              <li class="is-gone"><span class="av" style="background:#6B3FD0">T</span><span><b>Travel Deals</b><small>9 emails a month</small></span><span class="pill">Unsubscribed</span></li>
+              <li class="is-now"><span class="av" style="background:#0B7A45">A</span><span><b>App Updates</b><small>6 emails a month</small></span><span class="pill">Unsubscribing</span></li>
+              <li><span class="av" style="background:#3B3FBF">C</span><span><b>Club News</b><small>4 emails a month</small></span><span class="pill">Waiting</span></li>
+              </ul></div>
+          </div>
+        </article>
+
+        <article class="panel plum flip" id="safe">
+          <div>
+            <h3>It never reads your email</h3>
+            <p>Other tools ask to sign in to your Google account and read your mail on their servers. UnsubSweep has no sign-in and no server.</p>
+            <p class="fine"><a class="button light" href="/privacy">Read the privacy policy</a></p>
+          </div>
+          <div class="show">
+            <div class="card">
+              <h4>What UnsubSweep can do</h4>
+              <ul class="checks">
+                <li class="yes"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Click buttons on the Gmail tab you open it on</li>
+              </ul>
+              <h4>What it can't do</h4>
+              <ul class="checks">
+                <li class="no"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> Read, send or delete your email</li>
+                <li class="no"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> Sign in to your Google account</li>
+                <li class="no"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> Send anything to a server</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel leaf">
+          <div>
+            <h3>You can stop it any time</h3>
+            <p>Watch the count go up in the popup and press Stop whenever you like. It also stops by itself if you leave the page.</p>
+          </div>
+          <div class="show">
+            <div class="popup" style="width:260px">
+              <span class="brand"><img src="/icons/icon48.png" width="22" height="22" alt="" loading="lazy">UnsubSweep</span>
+              <button class="start" type="button" disabled>Start sweep</button>
+              <button class="stop" type="button" tabindex="-1">Stop</button>
+              <output>Running: 37 unsubscribed, 2 skipped.</output>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel dusk flip">
+          <div>
+            <h3>Stubborn senders get their own tab</h3>
+            <p>Some senders only let you leave on their website. UnsubSweep skips them, or opens their page for you if you tick the box.</p>
+            <p class="fine">At most 5 tabs per run.</p>
+          </div>
+          <div class="show">
+            <div class="card">
+              <h4>Unsubscribe from Travel Deals?</h4>
+              <p style="margin:0;font-size:.98rem;color:var(--text)">To stop these emails, go to the sender's website.</p>
+              <div class="dialog-btns"><span>Cancel</span><span class="go">Go to website</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel night pro">
+          <div>
+            <h3>Pro will tell you which ones to drop <span class="badge">In development</span></h3>
+            <p>We're building a smarter version that suggests the senders you never open, sorts them into groups, and follows rules you write in plain English.</p>
+            <p class="fine"><a class="button light" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/releases">Follow progress on GitHub</a></p>
+          </div>
+          <div class="show">
+            <div class="win"><div class="win-head"><b>Suggested for you</b><span class="pill">Preview</span></div>
+              <ul class="rows">
+              <li><span class="av" style="background:#C2360F">S</span><span><b>Shop Daily</b><span class="reason">You opened 0 of 42 emails</span></span><span class="pill">Suggested</span></li>
+              <li><span class="av" style="background:#3B3FBF">D</span><span><b>Deal Alerts</b><span class="reason">Never opened</span></span><span class="pill">Suggested</span></li>
+              <li><span class="av" style="background:#8A5A0B">B</span><span><b>Blog Weekly</b><span class="reason">You read most of these</span></span><span class="pill">Keep</span></li>
+              </ul></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="try-title" style="background:var(--wash)">
+      <div class="wrap">
+        <header>
+          <h2 id="try-title">Try it on a pretend inbox</h2>
+          <p>This is the real extension running on a made-up Gmail page. Nothing here touches your account.</p>
+        </header>
+        <div class="demo-frame"><iframe src="/demo/" title="Live demo: the UnsubSweep popup next to a pretend Gmail subscriptions page" loading="lazy"></iframe></div>
+        <ol class="demo-steps">
+          <li><span>Press <strong>Start sweep</strong> in the small UnsubSweep box.</span></li>
+          <li><span>Watch each sender get unsubscribed, one at a time.</span></li>
+          <li><span>It ends on "Swept: 4 unsubscribed, 1 skipped."</span></li>
+        </ol>
+        <p class="note">Easier to see on a computer. <a href="/try/">Open the demo full size</a>.</p>
+      </div>
+    </section>
+
+    <section class="section" id="plans" aria-labelledby="plans-title">
+      <div class="wrap">
+        <header>
+          <h2 id="plans-title">Free today. Pro is on the way.</h2>
+        </header>
+        <div class="plans">
+          <div class="plan">
+            <h3>UnsubSweep</h3>
+            <p class="price">Free</p>
+            <p>Everything on this page that isn't marked "In development".</p>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Unsubscribe from every sender in one run</li>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> No sign-in, no account</li>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Never reads your email</li>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Open source</li>
+            </ul>
+            <a class="button" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#install-load-unpacked">Get UnsubSweep <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 4.5L14.5 9 10 13.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+          <div class="plan pro">
+            <h3>UnsubSweep Pro <span class="badge">In development</span></h3>
+            <p class="price">Not out yet</p>
+            <p>Planned. The price isn't set.</p>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Suggests the senders you never open</li>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Groups senders: shopping, news, apps</li>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Rules in plain English</li>
+              <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> A digest of the newsletters you keep</li>
+            </ul>
+            <a class="button light" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe/releases">Follow progress</a>
+          </div>
+        </div>
+        <p class="note">Pro will ask to sign in with Google so it can see which senders you open. Your mail will stay in your browser.</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="faq-title" style="padding-top:0">
+      <div class="wrap">
+        <header><h2 id="faq-title">Questions people ask</h2></header>
+        <div class="faq">
+          <div><h3>Does it read my email?</h3><p>No. It only sees the Manage subscriptions page while it runs: the sender names and the buttons. It can't open messages.</p></div>
+          <div><h3>Can I choose which senders to keep?</h3><p>Not yet. A run unsubscribes from every sender on the page, and it can't be undone. Only press Start when you want to leave them all.</p></div>
+          <div><h3>Do I need an account?</h3><p>No account, no sign-in and no payment. Install it and press Start.</p></div>
+          <div><h3>Does it work in my language?</h3><p>Only when Gmail is set to English for now. In other languages it finds nothing to click.</p></div>
+          <div><h3>Has it been tested on real Gmail?</h3><p>It's tested on a copy of Gmail's page that we wrote by hand, not yet on a live account. Gmail can change its page at any time.</p></div>
+          <div><h3>Where is the Chrome Web Store link?</h3><p>Coming. Until then you can <a href="/docs/#install">install it from GitHub</a> in about a minute.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <section class="finale" aria-labelledby="finale-title">
+        <h2 id="finale-title">A quieter inbox is one click away</h2>
+        <p>Free, open source, and it never asks for your password.</p>
+        <a class="button light" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#install-load-unpacked">Get UnsubSweep <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 4.5L14.5 9 10 13.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </section>
+    </div>
   </main>
 
   <!--footer-->

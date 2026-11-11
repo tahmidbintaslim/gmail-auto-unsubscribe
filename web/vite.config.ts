@@ -20,7 +20,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: here("index.html"),
-        features: here("features/index.html"),
         try: here("try/index.html"),
         docs: here("docs/index.html"),
         privacy: here("privacy.html"),

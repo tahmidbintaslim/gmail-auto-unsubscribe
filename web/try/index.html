@@ -14,29 +14,18 @@
 
   <main id="main">
     <header class="page-head">
-      <h1>Take it for a sweep.</h1>
-      <p class="lede">This is the extension's own code running against a hand-written stand-in for Gmail. No account, no real email, nothing leaves this page.</p>
+      <h1>Try it on a pretend inbox</h1>
+      <p class="lede">The real extension, running on a made-up Gmail page. Nothing here touches your account.</p>
     </header>
-    <div class="try">
-      <div class="chrome">
-        <div class="chrome-bar" aria-hidden="true">
-          <span class="dots"><i></i><i></i><i></i></span>
-          <span class="url">mail.google.com/mail/u/0/#sub (stand-in)</span>
-        </div>
-        <iframe src="/demo/" title="UnsubSweep demo: the extension popup next to a stand-in Gmail subscriptions page" loading="lazy"></iframe>
-      </div>
-      <aside class="guide" aria-labelledby="guide-title">
-        <h2 id="guide-title" style="font-size:1.8rem">What to do</h2>
-        <ol>
-          <li>Look at the stand-in list: five senders, one of which only offers Go to website.</li>
-          <li>Press <strong>Start sweep</strong> in the popup.</li>
-          <li>Watch each dialog open and get confirmed, one sender at a time, bottom row first.</li>
-          <li>The popup should end on <strong>Swept: 4 unsubscribed, 1 skipped.</strong> Example Travel stays, because it has no one-click option.</li>
-          <li>Press <strong>Reset</strong> and try again with the website box ticked. The click is counted; in the demo it opens nothing.</li>
-        </ol>
-        <p class="note">On a phone? It works, but the demo is easier on a wider screen. <a href="/demo/">Open the demo on its own</a>.</p>
-        <p class="note">This is a stand-in, not Gmail, so it shows how the loop behaves, not proof that it works on your account.</p>
-      </aside>
+    <div class="wrap">
+      <div class="demo-frame"><iframe src="/demo/" title="Live demo: the UnsubSweep popup next to a pretend Gmail subscriptions page"></iframe></div>
+      <ol class="demo-steps">
+        <li><span>Press <strong>Start sweep</strong> in the small UnsubSweep box.</span></li>
+        <li><span>Watch each sender get unsubscribed, one at a time, bottom row first.</span></li>
+        <li><span>It ends on "Swept: 4 unsubscribed, 1 skipped." Press <strong>Reset</strong> to run it again.</span></li>
+      </ol>
+      <p class="note">One sender, Example Travel, stays: it has no one-click option. This shows how the extension behaves; it isn't proof it works on your account.</p>
+      <p style="margin-top:32px"><a class="button" href="https://github.com/tahmidbintaslim/gmail-auto-unsubscribe#install-load-unpacked">Get UnsubSweep <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 4.5L14.5 9 10 13.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
     </div>
   </main>
 
