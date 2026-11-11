@@ -1,6 +1,6 @@
 # Design
 
-The website's visual system (`web/`). The owner named Momentum (momentumdash.com) as the standard to sit alongside: a bright, airy page, one short headline and one button, the product shown large, colour carried by big panels. This is that pattern in UnsubSweep's own colours, not a copy of Momentum's brand.
+The website's visual system (`web/`). The owner named Momentum (momentumdash.com) as the standard to sit alongside, and Figma community kits (Landify, Iconly, Simple Design System, device mockups) as inspiration: a bright, airy page, one short headline and one button, the product shown large, colour carried by big panels. This is that pattern in UnsubSweep's own colours, not a copy of Momentum's brand.
 
 ## Colour
 
@@ -25,14 +25,24 @@ Figtree Variable, self-hosted. Headings 720–750 weight, tracking -0.025em, bal
 ## Layout
 
 - Max width 1200px, gutter `clamp(20px, 5vw, 72px)`.
-- Home order: hero with the working mini-inbox, one statement, five benefit panels, live demo, Free and Pro, questions, closing band, dark footer.
+- Home order: hero with the working mini-inbox in a laptop frame, three numbered steps, a six-item feature grid, three benefit panels, live demo, Free and Pro, questions, closing band, dark footer.
 - One primary action per screen: the dark pill "Get UnsubSweep".
 - Every Pro block carries an "In development" badge.
+
+## Tokens
+
+Radius: `--radius` 28px (panels), `--radius-m` 20px (cards, windows), `--radius-s` 12px (rows). Shadow: `--shadow-1`, `--shadow-2`. Spacing: `--gutter`, `--space-section`. The audit and open follow-ups are in `docs/design/design-system-audit.md`.
+
+## Icons
+
+One family in `web/src/partials/header.html` as an SVG sprite: 24px grid, 1.6px rounded strokes, drawn in the style of Iconly Light. Use `<svg class="icon"><use href="#i-name"/></svg>`.
 
 ## Components
 
 - **Button:** pill, ink fill; `light` (white) on colour fields; `quiet` (outline).
 - **Window (`.win`) and popup (`.popup`):** the product mock, with soft offset shadows. Rows use `is-gone`, `is-now`, `is-skip`.
+- **Laptop frame (`.laptop`):** dark bezel and a base, around a browser bar and a Gmail-like two-column layout.
+- **Step card and feature item:** an icon tile, a heading and one line.
 - **Panel:** 28px radius, text on one side and a product mock on the other; `flip` swaps sides.
 
 ## Motion

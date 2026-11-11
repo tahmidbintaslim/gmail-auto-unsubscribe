@@ -12,7 +12,7 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // The hero demo: a pretend subscriptions list the visitor can sweep. Works without GSAP.
 const stage = document.getElementById("sweep");
 if (stage) {
-  const rows = [...stage.querySelectorAll<HTMLLIElement>(".win:not(.before) .rows li")];
+  const rows = [...stage.querySelectorAll<HTMLLIElement>(".rows li")];
   const start = stage.querySelector<HTMLButtonElement>(".start")!;
   const reset = stage.querySelector<HTMLButtonElement>(".stop")!;
   const out = stage.querySelector("output")!;
@@ -54,7 +54,7 @@ if (stage) {
 }
 
 async function reveal() {
-  const targets = document.querySelectorAll<HTMLElement>(".panel, .statement .wrap, .plan, .demo-frame, .finale");
+  const targets = document.querySelectorAll<HTMLElement>(".panel, .steps li, .features li, .plan, .demo-frame, .finale");
   if (!targets.length) return;
   const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
   gsap.registerPlugin(ScrollTrigger);

@@ -67,6 +67,14 @@ describe("landing page", () => {
     for (const el of pro) expect(el.textContent).toMatch(/In development/);
   });
 
+  it("draws every icon from the one sprite", () => {
+    const doc = new JSDOM(html).window.document;
+    const ids = new Set([...doc.querySelectorAll("symbol")].map((el) => el.id));
+    const uses = [...doc.querySelectorAll("use")].map((el) => el.getAttribute("href").slice(1));
+    expect(uses.length).toBeGreaterThan(6);
+    for (const id of uses) expect(ids.has(id), id).toBe(true);
+  });
+
   it("is honest about the limits next to the claims", () => {
     expect(html).toMatch(/no undo/i);
     expect(html).toMatch(/not yet on a live account/i);
