@@ -1,10 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "",
-  "outputDirectory": ".",
+  "buildCommand": "npm ci --prefix web && npm run build --prefix web",
+  "outputDirectory": "web/dist",
   "rewrites": [
-    { "source": "/", "destination": "/site/index.html" },
-    { "source": "/privacy", "destination": "/site/privacy.html" },
-    { "source": "/privacy/", "destination": "/site/privacy.html" }
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/privacy/", "destination": "/privacy.html" }
   ]
 }
