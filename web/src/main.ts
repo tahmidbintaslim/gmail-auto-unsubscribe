@@ -12,7 +12,7 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // The hero demo: a pretend subscriptions list the visitor can sweep. Works without GSAP.
 const stage = document.getElementById("sweep");
 if (stage) {
-  const rows = [...stage.querySelectorAll<HTMLLIElement>(".rows li")];
+  const rows = [...stage.querySelectorAll<HTMLLIElement>(".after .rows li")];
   const start = stage.querySelector<HTMLButtonElement>(".start")!;
   const reset = stage.querySelector<HTMLButtonElement>(".stop")!;
   const out = stage.querySelector("output")!;
@@ -54,8 +54,8 @@ if (stage) {
 }
 
 async function reveal() {
-  const targets = document.querySelectorAll<HTMLElement>(".panel, .steps li, .features li, .plan, .demo-frame, .finale");
-  if (!targets.length) return;
+  const targets = document.querySelectorAll<HTMLElement>(".steps li, .plan, .finale");
+  if (!targets.length && !document.querySelector(".screen")) return;
   const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
   gsap.registerPlugin(ScrollTrigger);
   for (const el of targets) {
@@ -70,10 +70,15 @@ async function reveal() {
       scrollTrigger: { trigger: el, start: "top 88%", once: true },
       onComplete: () => el.classList.remove("will-reveal"),
     });
-    // The product shot inside a panel drifts up a little slower than the panel.
-    const show = el.querySelector(".show > *");
-    if (show) gsap.from(show, { y: 60, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 80%", once: true } });
   }
+  // Stacking scenes: as the next scene slides over, the one underneath eases back.
+  const scenes = [...document.querySelectorAll<HTMLElement>(".screen")];
+  scenes.forEach((scene, i) => {
+    const inner = scene.querySelector(".screen-inner");
+    gsap.from(scene.querySelector(".show > *"), { y: 80, opacity: 0, duration: 1.1, ease: "expo.out", scrollTrigger: { trigger: scene, start: "top 55%", once: true } });
+    const next = scenes[i + 1];
+    if (next && inner) gsap.to(inner, { scale: 0.94, opacity: 0.4, ease: "none", scrollTrigger: { trigger: next, start: "top bottom", end: "top top", scrub: true } });
+  });
 }
 
 if (!reducedMotion) requestAnimationFrame(() => setTimeout(reveal, 0));
