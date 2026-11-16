@@ -75,6 +75,15 @@ describe("landing page", () => {
     for (const id of uses) expect(ids.has(id), id).toBe(true);
   });
 
+  it("ships every scene photo the stylesheet points at", () => {
+    const css = read("web/src/style.css");
+    const photos = [...css.matchAll(/url\("\/scenes\/([a-z]+\.jpg)"\)/g)].map((m) => m[1]);
+    expect(photos.sort()).toEqual(["dawn.jpg", "dusk.jpg", "forest.jpg", "night.jpg", "sea.jpg"]);
+    for (const file of photos) expect(existsSync(join(root, "web/public/scenes", file)), file).toBe(true);
+    // The dark layer behind the caption must span the scene on both layouts.
+    expect(css).toMatch(/\.screen\.flip::before \{ left: 0; right: 0;/);
+  });
+
   it("is honest about the limits next to the claims", () => {
     expect(html).toMatch(/no undo/i);
     expect(html).toMatch(/not yet on a live account/i);
