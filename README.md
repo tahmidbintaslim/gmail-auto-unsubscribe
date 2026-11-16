@@ -234,7 +234,7 @@ scripts/package.mjs   Builds the Chrome Web Store zip (npm run package)
 
 ## Deployment
 
-- **Extension:** `npm run package` writes `dist/unsubsweep-<version>.zip` with only the shipped files. Upload it with the copy in [`docs/store-listing.md`](docs/store-listing.md). The name uses "for Gmail" only, per Google's branding rules.
+- **Extension:** `npm run package` writes `dist/unsubsweep-<version>.zip` (Chrome, Edge, Opera) and `-firefox.zip` with only the shipped files. Per-store steps are in [`docs/submission.md`](docs/submission.md); the copy is in [`docs/store-listing.md`](docs/store-listing.md). The name uses "for Gmail" only, per Google's branding rules.
 - **Website:** Vercel builds [`web/`](web/) (`npm run build --prefix web`) and serves `web/dist` at [unsubsweep.vercel.app](https://unsubsweep.vercel.app). The build copies the demo in, so `/demo/` keeps working. `npm run smoke --prefix web` checks every page in a headless browser.
 - **Launch posts:** [`docs/launch.md`](docs/launch.md).
 

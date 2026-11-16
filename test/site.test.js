@@ -77,8 +77,8 @@ describe("landing page", () => {
 
   it("ships every scene photo the stylesheet points at", () => {
     const css = read("web/src/style.css");
-    const photos = [...css.matchAll(/url\("\/scenes\/([a-z]+\.jpg)"\)/g)].map((m) => m[1]);
-    expect(photos.sort()).toEqual(["dawn.jpg", "dusk.jpg", "forest.jpg", "night.jpg", "sea.jpg"]);
+    const photos = [...css.matchAll(/url\("\/scenes\/([a-z]+\.webp)"\)/g)].map((m) => m[1]);
+    expect(photos.sort()).toEqual(["dawn.webp", "dusk.webp", "forest.webp", "night.webp", "sea.webp"]);
     for (const file of photos) expect(existsSync(join(root, "web/public/scenes", file)), file).toBe(true);
     // The dark layer behind the caption must span the scene on both layouts.
     expect(css).toMatch(/\.screen\.flip::before \{ left: 0; right: 0;/);
@@ -104,5 +104,21 @@ describe("vercel.json", () => {
     const rule = config.rewrites.find((r) => r.source === source);
     expect(rule?.destination).toBe("/privacy.html");
     expect(existsSync(join(root, "web/privacy.html"))).toBe(true);
+  });
+});
+
+describe("search and sharing", () => {
+  it("sitemap lists every page and robots.txt points at it", () => {
+    const urls = [...read("web/public/sitemap.xml").matchAll(/<loc>https:\/\/unsubsweep\.vercel\.app(.*?)<\/loc>/g)].map((m) => m[1]);
+    expect(urls).toEqual(["/", "/try/", "/docs/", "/privacy"]);
+    expect(read("web/public/robots.txt")).toContain("Sitemap: https://unsubsweep.vercel.app/sitemap.xml");
+  });
+
+  it("has a share image and valid structured data that claims no ratings", () => {
+    expect(existsSync(join(root, "web/public/og.jpg"))).toBe(true);
+    const data = JSON.parse(doc("web/index.html").querySelector('script[type="application/ld+json"]').textContent);
+    expect(data["@type"]).toBe("SoftwareApplication");
+    expect(data.offers.price).toBe("0");
+    expect(data).not.toHaveProperty("aggregateRating");
   });
 });
