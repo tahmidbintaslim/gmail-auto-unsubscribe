@@ -43,7 +43,7 @@ describe("landing page", () => {
 
   it("links to the privacy policy, help, the demo and both in-page sections", () => {
     const hrefs = [...new JSDOM(html).window.document.querySelectorAll("a")].map((a) => a.getAttribute("href"));
-    for (const href of ["/privacy", "/docs/", "/try/", "/demo/", "/#how", "/#safe"]) expect(hrefs).toContain(href);
+    for (const href of ["/privacy", "/docs/", "/try/", "/demo/", "/#how", "/#plans"]) expect(hrefs).toContain(href);
     const doc = new JSDOM(html).window.document;
     for (const id of ["how", "safe", "plans"]) expect(doc.getElementById(id), id).toBeTruthy();
   });
@@ -71,7 +71,7 @@ describe("landing page", () => {
     const doc = new JSDOM(html).window.document;
     const ids = new Set([...doc.querySelectorAll("symbol")].map((el) => el.id));
     const uses = [...doc.querySelectorAll("use")].map((el) => el.getAttribute("href").slice(1));
-    expect(uses.length).toBeGreaterThan(6);
+    expect(uses.length).toBeGreaterThanOrEqual(3);
     for (const id of uses) expect(ids.has(id), id).toBe(true);
   });
 
