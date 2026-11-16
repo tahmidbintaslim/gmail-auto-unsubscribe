@@ -20,7 +20,7 @@ The website's visual system (`web/`). The owner named Momentum (momentumdash.com
 
 ## Type
 
-Figtree Variable, self-hosted. Headings 720–750 weight, tracking -0.025em, balanced. Body 18px/1.6. No eyebrow labels above headings.
+Figtree Variable, self-hosted. Page and section headings up to 60px, 700–750 weight, tracking -0.028em, line height 1 to 1.02. Section intro paragraphs up to 24px. Body 18px/1.6. No eyebrow labels above headings.
 
 ## Layout
 
@@ -30,7 +30,7 @@ Follows the reference's structure, in UnsubSweep's own colours, words and pictur
 - Header: round logo and three links together on the left, one dark pill on the right.
 - Hero: nearly a full screen tall. Headline, one sentence, one dark pill, a small note. On the right, a small "before" list, a hand-drawn arrow, the working list, and the popup floating over its corner.
 - Intro: a left-aligned heading and paragraph, then three step cards.
-- Scenes: five full-width, full-height colour scenes (dawn, sea, forest, dusk, night), each with soft hills, one large white caption and one product mock. On wide screens each scene sticks and the next slides over it.
+- Scenes: five landscape photos (dawn, sea, forest, dusk, night) as cards set 10px in from the page edges with 32px corners. Each has one large white caption over a dark gradient and one product mock. On wide screens each scene sticks and the next slides over it. Photos are in `web/public/scenes/` (Unsplash License, see `CREDITS.md` there).
 - Pricing: centered heading, two cards.
 - Demo call-out card: text left, screenshot right.
 - Questions in two columns, then a dark footer with a hill line.
@@ -50,7 +50,7 @@ One family in `web/src/partials/header.html` as an SVG sprite: 24px grid, 1.6px 
 - **Window (`.win`) and popup (`.popup`):** the product mock, with soft offset shadows. Rows use `is-gone`, `is-now`, `is-skip`.
 - **Laptop frame (`.laptop`):** dark bezel and a base, around a browser bar and a Gmail-like two-column layout.
 - **Step card and feature item:** an icon tile, a heading and one line.
-- **Scene (`.screen`):** full-width colour field with `--sky`, `--sun` and `--land`; `flip` puts the caption on the right. White text must reach 4.5:1 on the sky.
+- **Scene (`.screen`):** photo card with `--photo`; `flip` puts the caption on the right. The `::before` layer darkens the caption side so white text stays readable.
 
 ## Motion
 
