@@ -45,4 +45,4 @@ jobs:
       - run: npm ci --prefix web
       - run: npm run build --prefix web
       - run: npm run package
-      - run: unzip -l dist/unsubsweep-*.zip
+      - run: for zip in dist/unsubsweep-*.zip; do unzip -l "$zip"; done
