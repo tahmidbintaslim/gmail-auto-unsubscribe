@@ -337,7 +337,7 @@ h2 .badge, h3 .badge { margin-left: 10px; }
 
 /* ---- Closer to the reference: calmer ground, larger type, more air, photo scenes set in from the edges ---- */
 :root { --radius-xl: 32px; --space-section: clamp(88px, 12vw, 176px); }
-body { background: #FFFBF8; font-size: 18px; }
+body { background: #FFFFFF; font-size: 18px; }
 .glow { height: 1100px; }
 .glow::before { width: 900px; height: 900px; right: -260px; top: -420px; background: #FFC2A0; opacity: 0.85; filter: blur(110px); }
 .glow::after { width: 760px; height: 760px; left: -420px; top: 220px; background: #FFDDA8; opacity: 0.75; filter: blur(110px); }
