@@ -55,7 +55,7 @@ Figtree Variable, self-hosted. Headings 720–750 weight, tight tracking. Body 1
 - Minimum size 16px. Don't recolour, rotate or crop the tile into a circle.
 - The wordmark is "UnsubSweep", one word, capital U and S.
 - The extension icons and store images are generated from these files: `npm run icons`, then `npm run store-assets`.
-- Figma: the brand board (logo, colour, type, icons) lives in the UnsubSweep Brand file; the SVGs in `brand/` are the source of truth.
+- Figma: [UnsubSweep Brand](https://www.figma.com/design/7QB9fAbGDQAbgUtEZ9jtc8) has the brand board, logo and icon components, colour variables and Figtree text styles. The SVGs in `brand/` stay the source of truth for code.
 
 ## Icons
 
