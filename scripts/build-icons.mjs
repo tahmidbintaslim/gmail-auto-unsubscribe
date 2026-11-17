@@ -13,8 +13,11 @@ const browser = await chromium.launch();
 try {
   for (const size of [16, 48, 128]) {
     const page = await browser.newPage({ viewport: { width: size, height: size }, deviceScaleFactor: 1 });
+    // Chrome Web Store: the 128 icon is 96px of artwork inside 16px of transparent padding.
+    const art = size === 128 ? 96 : size;
+    const pad = (size - art) / 2;
     await page.setContent(
-      `<style>html,body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`,
+      `<style>html,body{margin:0;background:transparent}svg{display:block;width:${art}px;height:${art}px;margin:${pad}px}</style>${svg}`,
     );
     await page.screenshot({ path: join(root, `icons/icon${size}.png`), omitBackground: true });
     await page.close();

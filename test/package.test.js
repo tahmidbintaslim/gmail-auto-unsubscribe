@@ -37,5 +37,7 @@ describe("firefoxManifest", () => {
     expect(rest).toEqual(manifest);
     expect(browser_specific_settings.gecko.id).toMatch(/^[\w.-]+@[\w.-]+$/);
     expect(browser_specific_settings.gecko.data_collection_permissions).toEqual({ required: ["none"] });
+    // data_collection_permissions is ignored before Firefox 140.
+    expect(parseFloat(browser_specific_settings.gecko.strict_min_version)).toBeGreaterThanOrEqual(140);
   });
 });

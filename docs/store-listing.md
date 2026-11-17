@@ -1,10 +1,10 @@
-# Chrome Web Store listing: UnsubSweep
+# Store listing: UnsubSweep
 
-Paste these fields into the Chrome Web Store developer dashboard. Package: `npm run package` → `dist/unsubsweep-<version>.zip`.
+Paste these fields into each store's dashboard (Chrome, Edge, Opera, Firefox); per-store steps are in [`submission.md`](submission.md). Package: `npm run package` → `dist/unsubsweep-<version>.zip`.
 
 ## Name
 
-`UnsubSweep: Bulk Unsubscribe for Gmail` (same as `manifest.json`)
+`UnsubSweep: Bulk Unsubscribe for Gmail™` (same as `manifest.json`). Google's branding rules want "for" plus ™ when a name refers to a Google product: https://developer.chrome.com/docs/webstore/branding
 
 ## Summary
 
@@ -45,7 +45,7 @@ PRIVACY
 
 There is no undo: a run unsubscribes from every sender on the page. Works with Gmail's English interface.
 
-UnsubSweep is not affiliated with or endorsed by Google. Gmail is a trademark of Google LLC.
+UnsubSweep is not affiliated with or endorsed by Google. Gmail is a trademark of Google LLC. Use of this trademark is subject to Google Permissions.
 ```
 
 ## Privacy practices tab
@@ -54,7 +54,11 @@ UnsubSweep is not affiliated with or endorsed by Google. Gmail is a trademark of
 - **`activeTab` justification:** Gives the extension access to the Gmail tab the user opened the popup from, only when they open it, so it can check the page is Manage subscriptions and run there. It has no access to any other tab or site.
 - **`scripting` justification:** Injects the extension's own two script files (`unsubscriber.js`, `content.js`) into that tab when the user presses Start. No remote code; nothing runs before Start.
 - **Remote code:** No, I am not using remote code.
-- **Data usage:** I do not collect or use user data. Tick all three certifications.
+- **Data usage:** Google counts data handled only on the device as user data too (https://developer.chrome.com/docs/webstore/program-policies/user-data-faq), so disclose what it reads:
+  - Tick **Website content** (it reads the Manage subscriptions page) and **Personally identifiable information** (that page shows sender names and email addresses).
+  - Tick all three certifications: not sold to third parties, not used for unrelated purposes, not used for creditworthiness or lending.
+  - If a free-text box is offered: "Read only in the user's own browser tab while a run is going, to find and press Unsubscribe. Never stored, never transmitted."
+  - Edge Partner Center asks the same question; give the same answer there.
 - **Privacy policy URL:** `https://unsubsweep.vercel.app/privacy` (live). Switch to `https://unsubsweep.com/privacy` once the domain points at the Vercel project.
 
 ## Account
@@ -68,3 +72,5 @@ UnsubSweep is not affiliated with or endorsed by Google. Gmail is a trademark of
 | Store icon | 128×128 | `icons/icon128.png` |
 | Screenshots (3) | 1280×800 | `docs/store/screenshot-1-ready.png`, `screenshot-2-running.png`, `screenshot-3-swept.png` (captured from the demo; the left pane is labelled a stand-in) |
 | Small promo tile | 440×280 | `docs/store/promo-small-440x280.png` |
+| Opera screenshots (3) | 612×408 | `docs/store/opera/*.png` |
+| Edge logo | 300×300 | `docs/store/edge-logo-300.png` |
