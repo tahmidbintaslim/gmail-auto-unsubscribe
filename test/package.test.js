@@ -11,6 +11,8 @@ describe("shippedFiles", () => {
   it("lists exactly the extension files and icons", () => {
     expect(shippedFiles(manifest)).toEqual([
       "content.js",
+      "fonts/LICENSE-figtree",
+      "fonts/figtree.woff2",
       "icons/icon128.png",
       "icons/icon16.png",
       "icons/icon48.png",

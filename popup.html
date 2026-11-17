@@ -3,31 +3,33 @@
 <head>
   <meta charset="utf-8">
   <style>
-    /* UnsubSweep tokens. Dark values follow the OS theme. */
+    /* Figtree, the website's typeface, shipped with the extension (no font request leaves the browser). */
+    @font-face { font-family: "Figtree"; src: url("fonts/figtree.woff2") format("woff2"); font-weight: 300 900; }
+    /* UnsubSweep tokens, matched to the website. Dark values follow the OS theme. */
     :root {
-      --bg: #FFFBF7;
-      --fg: #1C1917;
-      --muted: #57534E;
-      --accent: #C2410C;
+      --bg: #FFFFFF;
+      --fg: #2A1220;
+      --muted: #5E4A55;
+      --accent: #C2360F;
       --accent-fg: #FFFFFF;
-      --surface: #F5EFE6;
-      --focus: #C2410C;
+      --surface: #FFF4EE;
+      --focus: #C2360F;
       color-scheme: light dark;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #1C1917;
-        --fg: #FAF7F2;
-        --muted: #A8A29E;
-        --accent: #FB923C;
-        --accent-fg: #1C1917;
-        --surface: #292524;
-        --focus: #FB923C;
+        --bg: #1B0C15;
+        --fg: #FFF4EE;
+        --muted: #C9B5BF;
+        --accent: #FF8A65;
+        --accent-fg: #1B0C15;
+        --surface: #2A1220;
+        --focus: #FF8A65;
       }
     }
     body {
       width: 240px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       padding: 14px;
       margin: 0;
       color: var(--fg);
