@@ -386,11 +386,11 @@ h2 { font-size: clamp(2.4rem, 4.4vw, 3.75rem); font-weight: 720; letter-spacing:
 .screen h3 { font-size: clamp(2.2rem, 4.4vw, 3.75rem); line-height: 1.02; font-weight: 700; max-width: 12ch; text-shadow: 0 2px 30px rgba(14, 6, 10, 0.45); }
 .screen .caption p { font-size: clamp(1.1rem, 1.6vw, 1.4rem); max-width: 30ch; text-shadow: 0 1px 20px rgba(14, 6, 10, 0.6); }
 .screen .win, .screen .card, .screen .popup { box-shadow: 0 30px 80px -20px rgba(14, 6, 10, 0.6); }
-.screen.dawn   { --photo: url("/scenes/dawn.jpg"); }
-.screen.sea    { --photo: url("/scenes/sea.jpg"); }
-.screen.forest { --photo: url("/scenes/forest.jpg"); }
-.screen.dusk   { --photo: url("/scenes/dusk.jpg"); }
-.screen.night  { --photo: url("/scenes/night.jpg"); }
+.screen.dawn   { --photo: url("/scenes/dawn.webp"); }
+.screen.sea    { --photo: url("/scenes/sea.webp"); }
+.screen.forest { --photo: url("/scenes/forest.webp"); }
+.screen.dusk   { --photo: url("/scenes/dusk.webp"); }
+.screen.night  { --photo: url("/scenes/night.webp"); }
 
 /* Pricing and the rest: larger headings, more air */
 .plans { gap: 20px; }
