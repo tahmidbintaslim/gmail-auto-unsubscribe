@@ -10,7 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 export function shippedFiles(manifest) {
-  const files = ["manifest.json", "popup.html", "popup.js", "unsubscriber.js", "content.js", ...Object.values(manifest.icons)];
+  const files = ["manifest.json", "popup.html", "popup.js", "unsubscriber.js", "content.js", "fonts/figtree.woff2", "fonts/LICENSE-figtree", ...Object.values(manifest.icons)];
   return [...new Set(files)].sort();
 }
 

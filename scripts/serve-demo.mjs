@@ -14,6 +14,8 @@ const types = {
   ".css": "text/css",
   ".png": "image/png",
   ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
 };
 
 createServer(async (req, res) => {

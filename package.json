@@ -16,7 +16,8 @@
     "test": "vitest run",
     "demo": "node scripts/serve-demo.mjs",
     "icons": "node scripts/build-icons.mjs",
-    "package": "node scripts/package.mjs"
+    "package": "node scripts/package.mjs",
+    "store-assets": "node scripts/store-assets.mjs"
   },
   "devDependencies": {
     "jsdom": "^30.1.3",

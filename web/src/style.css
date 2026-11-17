@@ -63,7 +63,6 @@ h2 .badge, h3 .badge { margin-left: 10px; }
 /* Header */
 .site-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: var(--max); margin: 0 auto; padding: 22px var(--gutter); position: relative; z-index: 2; }
 .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 750; font-size: 1.25rem; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
-.brand img { border-radius: 10px; }
 .site-head nav { display: flex; align-items: center; gap: clamp(14px, 3vw, 34px); }
 .site-head nav a { color: var(--ink); text-decoration: none; font-weight: 550; font-size: 1rem; }
 .site-head nav a:not(.button):hover, .site-head nav a[aria-current="page"] { color: var(--coral-ink); }
@@ -270,7 +269,6 @@ h2 .badge, h3 .badge { margin-left: 10px; }
 
 /* ---- Reference layout: airy hero, left intro, full-width stacking scenes ---- */
 .site-head { justify-content: flex-start; gap: clamp(20px, 4vw, 44px); padding-top: 28px; }
-.site-head .brand img { border-radius: 50%; }
 .site-head nav { gap: clamp(18px, 3vw, 36px); }
 .site-head nav a { font-size: 1.08rem; }
 .site-head > .button.small { margin-left: auto; padding: 11px 20px; font-size: 0.98rem; }
@@ -402,3 +400,7 @@ h2 { font-size: clamp(2.4rem, 4.4vw, 3.75rem); font-weight: 720; letter-spacing:
 .faq h3 { font-size: 1.2rem; }
 .faq p { font-size: 1.05rem; line-height: 1.6; }
 @media (max-width: 899px) { .screen::before, .screen.flip::before { background: rgba(14, 6, 10, 0.6); } }
+
+/* Lucide icons from the sprite in header.html: 18px inline, stroke follows text colour. */
+.i { width: 18px; height: 18px; flex: none; vertical-align: -3px; }
+.checks .i { margin-top: 3px; }

@@ -16,9 +16,11 @@ for (const path of [
   "popup.js",
   "unsubscriber.js",
   "content.js",
+  "fonts",
   "icons",
   "docs/images",
   "docs/store",
+  "brand",
 ]) {
   mkdirSync(dirname(join(dist, path)), { recursive: true });
   cpSync(join(repo, path), join(dist, path), { recursive: true });

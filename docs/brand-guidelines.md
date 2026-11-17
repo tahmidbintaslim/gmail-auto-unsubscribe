@@ -49,14 +49,17 @@ Figtree Variable, self-hosted. Headings 720–750 weight, tight tracking. Body 1
 
 ## Logo and icon
 
-- The mark is a white broom and envelope on a coral rounded square (`brand/mark.svg`).
+- The mark is Lucide's broom sweeping Lucide's mail icon, white on a coral (`#F2542D`) rounded square: `brand/mark.svg`.
+- Lockups: `brand/logo.svg` (ink wordmark, light backgrounds) and `brand/logo-dark.svg` (white wordmark, dark backgrounds and photos). The wordmark is outlined Figtree Bold, so the files need no font.
 - Keep clear space of a quarter of the mark's width on every side.
-- Minimum size 16px. Don't recolour, rotate or place it on a busy photo.
-- The wordmark is "UnsubSweep" in Figtree 750, one word, capital U and S.
+- Minimum size 16px. Don't recolour, rotate or crop the tile into a circle.
+- The wordmark is "UnsubSweep", one word, capital U and S.
+- The extension icons and store images are generated from these files: `npm run icons`, then `npm run store-assets`.
+- Figma: the brand board (logo, colour, type, icons) lives in the UnsubSweep Brand file; the SVGs in `brand/` are the source of truth.
 
 ## Icons
 
-One family: 24px grid, 1.6px rounded strokes, no fills, drawn in the style of Iconly Light. Icons sit in a rounded tile (ink fill for steps, pale coral for features).
+[Lucide](https://lucide.dev) (ISC licence): 24px grid, 2px rounded strokes, no fills. The site keeps them in one SVG sprite in `web/src/partials/header.html`; add an icon by copying its paths from Lucide into a new `<symbol id="i-name">`. Inline icons are 18px and take the text colour; step icons sit in an ink tile.
 
 ## Imagery
 
