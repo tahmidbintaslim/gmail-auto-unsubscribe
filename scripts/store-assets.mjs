@@ -1,7 +1,7 @@
 // Rebuilds the store images in docs/store from the live demo and brand/logo.svg.
 // Run after changing the popup or the logo: `npm run store-assets`.
 import { spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -27,6 +27,21 @@ try {
   await page.screenshot({ path: out("screenshot-2-running.png") });
   await popup.locator("#status").filter({ hasText: /^Swept:/ }).waitFor({ timeout: 30000 });
   await page.screenshot({ path: out("screenshot-3-swept.png") });
+
+  // Opera wants 612x408 (3:2, at most 800x600): trim the empty sides of the 1280x800 shots, then scale down.
+  const small = await browser.newPage({ viewport: { width: 612, height: 408 } });
+  mkdirSync(out("opera"), { recursive: true });
+  for (const name of ["screenshot-1-ready.png", "screenshot-2-running.png", "screenshot-3-swept.png"]) {
+    const png = readFileSync(out(name)).toString("base64");
+    await small.setContent(`<style>body{margin:0;overflow:hidden}img{display:block;width:653px;margin-left:-20px}</style><img src="data:image/png;base64,${png}">`);
+    await small.locator("img").evaluate((img) => img.decode());
+    await small.screenshot({ path: out(`opera/${name}`) });
+  }
+
+  // Edge Add-ons logo: 300x300 recommended; render it from the SVG rather than upscaling icon128.
+  const logo300 = await browser.newPage({ viewport: { width: 300, height: 300 } });
+  await logo300.setContent(`<style>html,body{margin:0;background:transparent}svg{display:block;width:300px;height:300px}</style>${readFileSync(join(root, "brand/mark.svg"), "utf8")}`);
+  await logo300.screenshot({ path: out("edge-logo-300.png"), omitBackground: true });
 
   const tile = await browser.newPage({ viewport: { width: 440, height: 280 } });
   const logo = readFileSync(join(root, "brand/logo.svg"), "utf8").replace(/width="\d+" height="128"/, 'width="300" height="69"');

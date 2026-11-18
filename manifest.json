@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "UnsubSweep: Bulk Unsubscribe for Gmail",
+  "name": "UnsubSweep: Bulk Unsubscribe for Gmail™",
   "short_name": "UnsubSweep",
   "version": "1.0.0",
   "description": "Bulk unsubscribe from Gmail newsletters in one click. Runs in your browser: no inbox access, no servers, no data.",

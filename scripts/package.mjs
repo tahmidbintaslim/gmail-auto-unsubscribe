@@ -14,14 +14,15 @@ export function shippedFiles(manifest) {
   return [...new Set(files)].sort();
 }
 
-// Firefox needs an add-on id and, for new listings, a data collection statement.
+// Firefox needs an add-on id and, for new listings, a data collection statement;
+// Firefox only reads data_collection_permissions from version 140.
 export function firefoxManifest(manifest) {
   return {
     ...manifest,
     browser_specific_settings: {
       gecko: {
         id: "unsubsweep@unsubsweep.vercel.app",
-        strict_min_version: "109.0",
+        strict_min_version: "140.0",
         data_collection_permissions: { required: ["none"] },
       },
     },

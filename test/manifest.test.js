@@ -19,7 +19,7 @@ describe("manifest.json", () => {
   });
 
   it("is branded UnsubSweep", () => {
-    expect(manifest.name).toBe("UnsubSweep: Bulk Unsubscribe for Gmail");
+    expect(manifest.name).toBe("UnsubSweep: Bulk Unsubscribe for Gmail™");
     expect(manifest.short_name).toBe("UnsubSweep");
     expect(manifest.version).toBe("1.0.0");
   });
